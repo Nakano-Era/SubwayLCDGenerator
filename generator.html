@@ -1,0 +1,2849 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地铁LCD生成器</title>
+    <!-- Import Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Outfit:wght@400;600;700;800&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <!-- html2canvas library for exporting image -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        /* ==========================================
+           1. GENERATOR DASHBOARD DESIGN SYSTEM (Dark Theme)
+           ========================================== */
+        :root {
+            --bg-dark: #0b0f19;
+            --bg-card: rgba(22, 28, 45, 0.7);
+            --bg-input: rgba(10, 14, 26, 0.8);
+            --border-glow: rgba(59, 130, 246, 0.2);
+            --text-light: #f3f4f6;
+            --text-muted: #9ca3af;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-orange: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', system-ui, sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.15) 0, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.1) 0, transparent 50%);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        header.dashboard-header {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .brand-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-title h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #fff 0%, #9ca3af 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-subtitle {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-link:hover {
+            color: #fff;
+        }
+
+        /* Layout Grid */
+        .workspace {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 20px;
+            padding: 20px;
+            flex-grow: 1;
+            max-width: 1920px;
+            margin: 0 auto;
+            width: 100%;
+            height: calc(100vh - 65px);
+        }
+
+        /* Sidebar Column */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        /* Main Workspace Column */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        /* Cards/Panels styling */
+        .glass-panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .glass-panel h2 {
+            font-size: 1rem;
+            font-weight: 700;
+            border-left: 4px solid var(--primary);
+            padding-left: 10px;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Forms Elements */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"], input[type="time"], select {
+            font-family: Arial, "Noto Sans SC", sans-serif;
+            background: var(--bg-input);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.875rem;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 8px var(--border-glow);
+            outline: none;
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            background: none;
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            accent-color: var(--primary);
+        }
+
+        /* Buttons styling */
+        .btn {
+            background-color: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-success {
+            background-color: var(--accent-green);
+        }
+
+        .btn-success:hover {
+            background-color: #059669;
+        }
+
+        .btn-danger {
+            background-color: var(--accent-red);
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .badge {
+            font-family: Arial, sans-serif;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+        }
+
+        /* Preset Row */
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .preset-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preset-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Station Editor Layout */
+        .station-editor {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-height: 350px;
+        }
+
+        .station-editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stations-list-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.15);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 480px;
+        }
+
+        .station-edit-row {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+
+        .station-edit-row:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .row-handle {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .btn-icon {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.65rem;
+            padding: 2px;
+            border-radius: 4px;
+            transition: color 0.2s, background-color 0.2s;
+        }
+
+        .btn-icon:hover:not(:disabled) {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-icon:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+        }
+
+        .row-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex-grow: 1;
+            max-width: 28%;
+        }
+
+        .row-inputs input {
+            padding: 4px 8px;
+            font-size: 0.75rem;
+        }
+
+        .row-status select {
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            width: 105px;
+        }
+
+        .row-transfers {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-grow: 1;
+            overflow-x: auto;
+            padding: 4px;
+        }
+
+        .edit-transfers-container {
+            display: flex;
+            gap: 4px;
+            flex-wrap: nowrap;
+        }
+
+        .edit-transfer-badge {
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            transition: opacity 0.2s;
+        }
+
+        .edit-transfer-badge:hover {
+            opacity: 0.8;
+        }
+
+        .btn-add-transfer {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px dashed rgba(255, 255, 255, 0.3);
+            color: var(--text-light);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.65rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .btn-add-transfer:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--primary);
+        }
+
+        .row-actions {
+            margin-left: auto;
+        }
+
+        .btn-delete {
+            background: transparent;
+            border: none;
+            color: var(--accent-red);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        /* Floating Preview Controller */
+        .preview-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 10px 20px;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .slider-group input[type="range"] {
+            width: 120px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .theme-select-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+        }
+
+        /* Interactive Live Preview Box */
+        .preview-wrapper {
+            background-color: #111;
+            background-image: 
+                linear-gradient(rgba(18, 18, 18, 0.4) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(18, 18, 18, 0.4) 1px, transparent 1px);
+            background-size: 20px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 30px;
+            overflow: auto;
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 480px;
+            position: relative;
+        }
+
+        .preview-scale-container {
+            transform-origin: center center;
+            transition: transform 0.1s ease;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9);
+            border-radius: 4px;
+            overflow: hidden;
+            background: #fff;
+            flex-shrink: 0;
+        }
+
+        /* ==========================================
+           2. LCD PREVIEW PANEL STRUCTURE (Scoped Styles)
+           ========================================== */
+        .lcd-panel {
+            width: 1550px; 
+            height: 460px;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-sizing: border-box;
+            overflow: hidden;
+            user-select: none;
+            font-family: Arial, "Noto Sans SC", sans-serif;
+            /* Variables overridden by generator JS */
+            --line-color: #C41230;
+            --logo-bg-color: #005A9E;
+            --logo-text-color: #ffffff;
+            --passed-color: #cccccc;
+            --active-color: #4CAF50;
+        }
+
+        /* LCD Header */
+        .lcd-panel .header {
+            display: flex;
+            align-items: stretch;
+            height: 60px;
+            border-top: 4px solid var(--line-color); 
+            border-bottom: 4px solid var(--line-color);
+            position: relative;
+            background-color: #fff;
+            box-sizing: border-box;
+        }
+
+        .lcd-panel .logo-area { 
+            display: flex; 
+            align-items: center; 
+            padding: 0 20px; 
+            font-size: 18px; 
+            font-weight: bold; 
+            color: var(--logo-bg-color); 
+            gap: 10px; 
+            font-family: Arial, "Noto Sans SC", sans-serif; 
+        }
+        
+        .lcd-panel .logo-icon { 
+            width: 32px; 
+            height: 32px; 
+            border: 3px solid var(--logo-bg-color); 
+            background-color: var(--logo-bg-color);
+            color: var(--logo-text-color);
+            border-radius: 50%; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-size: 18px; 
+            font-weight: 900;
+            font-family: Arial, sans-serif;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        
+        .lcd-panel .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .lcd-panel .time-area { 
+            display: flex; 
+            align-items: center; 
+            font-size: 16px; 
+            font-weight: bold; 
+            padding: 0 25px; 
+            color: #333; 
+            font-family: Arial, sans-serif; 
+            white-space: nowrap;
+        }
+        
+        .lcd-panel .next-station-area { 
+            flex: 1; 
+            background-color: var(--line-color); 
+            color: #fff; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            clip-path: polygon(20px 0, calc(100% - 20px) 0, 100% 100%, 0 100%); 
+            padding: 0 35px; 
+            box-sizing: border-box;
+        }
+        
+        .lcd-panel .next-station-area .cn { 
+            font-family: Arial, "Noto Sans SC", sans-serif; 
+            font-size: 24px; 
+            font-weight: 900; 
+            letter-spacing: 2px;
+            white-space: nowrap;
+        }
+        
+        .lcd-panel .next-station-area .en { 
+            font-family: Arial, sans-serif; 
+            font-size: 13px; 
+            font-weight: bold;
+            white-space: nowrap;
+            margin-top: 1px;
+        }
+        
+        .lcd-panel .door-area { 
+            display: flex; 
+            align-items: center; 
+            padding: 0 25px; 
+            gap: 8px; 
+        }
+        
+        .lcd-panel .door-icon { 
+            width: 12px; 
+            height: 22px; 
+            border: 2.5px solid #4CAF50; 
+            border-radius: 2px; 
+            position: relative; 
+        }
+        
+        .lcd-panel .door-icon::after { 
+            content: ''; 
+            position: absolute; 
+            top: 2px; 
+            left: 5px; 
+            bottom: 2px; 
+            border-left: 1.5px solid #4CAF50; 
+        }
+        
+        .lcd-panel .door-text { 
+            display: flex; 
+            flex-direction: column; 
+            text-align: center; 
+        }
+        
+        .lcd-panel .door-text .cn { 
+            font-family: Arial, "Noto Sans SC", sans-serif; 
+            font-size: 15px; 
+            font-weight: bold; 
+            color: #333;
+            white-space: nowrap;
+        }
+        
+        .lcd-panel .door-text .en { 
+            font-family: Arial, sans-serif; 
+            font-size: 8.5px; 
+            color: #666; 
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        .lcd-panel .terminal-area { 
+            display: flex; 
+            align-items: center; 
+            padding: 0 20px; 
+            gap: 10px; 
+        }
+        
+        .lcd-panel .terminal-text { 
+            display: flex; 
+            flex-direction: column; 
+            text-align: right;
+        }
+        
+        .lcd-panel .terminal-text .cn { 
+            font-family: Arial, "Noto Sans SC", sans-serif; 
+            font-size: 14px; 
+            font-weight: bold; 
+            color: #666;
+            white-space: nowrap;
+        }
+        
+        .lcd-panel .terminal-text .en { 
+            font-family: Arial, sans-serif; 
+            font-size: 8.5px; 
+            color: #888; 
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        .lcd-panel .terminal-name { 
+            display: flex; 
+            flex-direction: column; 
+            text-align: left; 
+        }
+        
+        .lcd-panel .terminal-name .cn { 
+            font-family: Arial, "Noto Sans SC", sans-serif; 
+            font-size: 20px; 
+            font-weight: 900; 
+            color: #333;
+            white-space: nowrap;
+        }
+        
+        .lcd-panel .terminal-name .en { 
+            font-family: Arial, sans-serif; 
+            font-size: 9.5px; 
+            color: #333; 
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        /* Route Map Area */
+        .lcd-panel .route-map {
+            height: 380px; 
+            position: relative;
+            display: flex;
+            padding: 0;
+            margin-top: 10px;
+        }
+
+        .lcd-panel .track-line-bg {
+            position: absolute;
+            top: 110px; 
+            left: 31px;
+            right: 31px;
+            height: 4px;
+            z-index: 1;
+            border-radius: 2px;
+            background: transparent;
+            overflow: hidden;
+        }
+
+        .lcd-panel .stations-container {
+            display: flex;
+            justify-content: space-between; 
+            width: 100%;
+            padding: 0 10px;
+            z-index: 2;
+            box-sizing: border-box;
+        }
+
+        .lcd-panel .station-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 42px; 
+            position: relative;
+            justify-content: flex-start;
+        }
+
+        /* Transfers badges space (Above node) */
+        .lcd-panel .transfer-area {
+            height: 98px; 
+            flex-shrink: 0; 
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 2px; 
+            position: relative;
+            z-index: 5;
+            width: 100%;
+        }
+        
+        .lcd-panel .transfer-box {
+            color: #fff;
+            border-radius: 4px; 
+            display: flex;
+            flex-direction: row; 
+            align-items: center;
+            justify-content: center;
+            width: 40px;  
+            height: 22px; 
+            box-sizing: border-box;
+            padding: 0 1px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            margin-top: 2px;
+        }
+        
+        .lcd-panel .transfer-num {
+            width: 14px; 
+            height: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 2px;
+        }
+        
+        .lcd-panel .transfer-num span {
+            font-family: Arial, sans-serif;
+            font-size: 16px; 
+            font-weight: bold; 
+            line-height: 1;
+            white-space: nowrap;
+            display: inline-block;
+        }
+
+        .lcd-panel .transfer-num span.double-digit {
+            font-size: 16px;
+            transform: scaleX(0.65);
+            transform-origin: center;
+        }
+        
+        .lcd-panel .transfer-text-group {
+            position: relative;
+            width: 22px;
+            height: 16px; 
+        }
+        
+        .lcd-panel .transfer-text-group .cn {
+            position: absolute;
+            top: 0;
+            left: 0;
+            font-family: Arial, "Noto Sans SC", sans-serif;
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 1;
+            white-space: nowrap;
+            transform: scale(0.75); 
+            transform-origin: top left;
+        }
+        
+        .lcd-panel .transfer-text-group .en {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 1;
+            white-space: nowrap;
+            transform: scale(0.55);
+            transform-origin: bottom left;
+        }
+
+        .lcd-panel .transfer-arrow {
+            width: 0;
+            height: 0;
+            border-left: 3px solid transparent;
+            border-right: 3px solid transparent;
+            border-top: 4px solid transparent;
+            margin-bottom: 2px;
+        }
+
+        .lcd-panel .transfer-box-rect {
+            color: #fff;
+            border-radius: 4px; 
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            justify-content: center;
+            height: 24px; 
+            padding: 1px 6px;
+            box-sizing: border-box;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            margin-top: 2px;
+            white-space: nowrap;
+            min-width: 42px;
+        }
+        
+        .lcd-panel .transfer-box-rect .cn {
+            font-family: Arial, "Noto Sans SC", sans-serif;
+            font-size: 10px;
+            font-weight: bold;
+            line-height: 1.1;
+            white-space: nowrap;
+        }
+        
+        .lcd-panel .transfer-box-rect .en {
+            font-family: Arial, sans-serif;
+            font-size: 5.5px;
+            font-weight: bold;
+            line-height: 1;
+            white-space: nowrap;
+            margin-top: 1px;
+        }
+
+        /* Dot circles */
+        .lcd-panel .dot-container {
+            height: 24px;
+            width: 24px;
+            flex-shrink: 0; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .lcd-panel .dot-outer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background-color: var(--active-color);
+            transition: all 0.3s ease;
+        }
+        
+        .lcd-panel .dot-inner {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #fff;
+        }
+
+        .lcd-panel .passed .dot-outer { 
+            background-color: var(--passed-color); 
+        }
+
+        .lcd-panel .closed .dot-outer {
+            background-color: #e2e8f0;
+            border: 2px solid #a0aec0;
+            position: relative;
+        }
+        .lcd-panel .closed .dot-outer::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background-color: #ef4444;
+            transform: rotate(45deg);
+        }
+        .lcd-panel .closed .name-cn {
+            color: #a0aec0;
+        }
+        .lcd-panel .closed .closed-label {
+            font-size: 8px;
+            color: #ef4444;
+            font-weight: normal;
+            margin-top: 4px;
+            line-height: 1.1;
+            text-align: center;
+        }
+        .lcd-panel .closed .name-en {
+            color: #ef4444 !important;
+            font-style: italic;
+        }
+        .lcd-dark-theme .lcd-panel .closed .dot-outer {
+            background-color: #2d3748;
+            border: 2px solid #4a5568;
+        }
+        .lcd-dark-theme .lcd-panel .closed .dot-inner {
+            background-color: #12161c;
+        }
+
+        .lcd-panel .current .dot-outer {
+            background-color: #FFB300;
+            box-shadow: 0 0 10px rgba(255,179,0,0.8);
+            width: 18px; 
+            height: 18px;
+            animation: pulse 1s infinite alternate;
+        }
+        .lcd-panel .current .dot-inner {
+            background-color: #FFED99;
+            width: 10px;
+            height: 10px;
+        }
+
+        /* Vertical Station Names */
+        .lcd-panel .name-area {
+            margin-top: 12px;
+            flex-shrink: 0; 
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            position: relative;
+            width: 100%;
+        }
+        
+        .lcd-panel .name-cn {
+            font-family: Arial, "Noto Sans SC", sans-serif;
+            font-size: 15px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            line-height: 1.15;
+        }
+        
+        .lcd-panel .name-en {
+            position: absolute;
+            top: 0;
+            left: calc(50% - 10px); 
+            transform-origin: top left;
+            transform: rotate(90deg); 
+            font-family: Arial, sans-serif;
+            font-size: 9.5px; 
+            line-height: 1;
+            color: #666;
+            white-space: nowrap; 
+        }
+
+        .lcd-panel .passed .name-cn, 
+        .lcd-panel .passed .name-en { 
+            color: #aaa; 
+        }
+
+        /* Optional Dark LCD Theme style toggled on generator wrapper */
+        .lcd-dark-theme .lcd-panel {
+            background-color: #12161c;
+            color: #e2e8f0;
+        }
+        .lcd-dark-theme .lcd-panel .header {
+            background-color: #161c24;
+        }
+        .lcd-dark-theme .lcd-panel .logo-area {
+            color: var(--logo-bg-color);
+        }
+        .lcd-dark-theme .lcd-panel .time-area {
+            color: #e2e8f0;
+        }
+        .lcd-dark-theme .lcd-panel .door-text .cn {
+            color: #e2e8f0;
+        }
+        .lcd-dark-theme .lcd-panel .door-text .en {
+            color: #8892b0;
+        }
+        .lcd-dark-theme .lcd-panel .terminal-text .cn {
+            color: #8892b0;
+        }
+        .lcd-dark-theme .lcd-panel .terminal-name .cn {
+            color: #e2e8f0;
+        }
+        .lcd-dark-theme .lcd-panel .terminal-name .en {
+            color: #8892b0;
+        }
+        .lcd-dark-theme .lcd-panel .name-cn {
+            color: #e2e8f0;
+        }
+        .lcd-dark-theme .lcd-panel .name-en {
+            color: #8892b0;
+        }
+        .lcd-dark-theme .lcd-panel .passed .name-cn,
+        .lcd-dark-theme .lcd-panel .passed .name-en {
+            color: #4a5568;
+        }
+        .lcd-dark-theme .lcd-panel .dot-inner {
+            background-color: #161c24;
+        }
+        .lcd-dark-theme .lcd-panel .passed .dot-inner {
+            background-color: #161c24;
+        }
+        .lcd-dark-theme .lcd-panel .current .dot-inner {
+            background-color: #FFED99;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); opacity: 1; }
+            to { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        /* ==========================================
+           3. MODAL AND POPUPS (For Transfer Config)
+           ========================================== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            width: 420px;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .modal-content h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 10px;
+        }
+
+        .preset-transfers {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .preset-transfer-btn {
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            transition: transform 0.1s, opacity 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        .preset-transfer-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.15);
+        }
+
+        .preset-transfer-btn .lang-en {
+            font-size: 0.55rem;
+            font-weight: normal;
+        }
+
+        .modal-inputs {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.15);
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header bar -->
+    <header class="dashboard-header">
+        <div class="brand-title">
+            <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="40" stroke="#3b82f6" stroke-width="8" />
+                <path d="M30 40H70M50 40V75" stroke="#3b82f6" stroke-width="8" stroke-linecap="round" />
+            </svg>
+            <div>
+                <h1>地铁LCD生成器</h1>
+                <div class="brand-subtitle">Metro LCD Generator</div>
+            </div>
+        </div>
+        <div class="nav-links">
+            <span class="badge" style="color: #60a5fa; border-color: rgba(96, 165, 250, 0.3);">26.5.30</span>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="workspace">
+        <!-- Sidebar Controls -->
+        <div class="sidebar">
+            
+            <!-- Global Config Card -->
+            <div class="glass-panel">
+                <h2>全局配置 <span class="brand-subtitle">Global Config</span></h2>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="config-metro-cn">地铁公司 (中)</label>
+                        <input type="text" id="config-metro-cn" oninput="updateGlobalSetting('metroNameCn', this.value)" placeholder="例: 北京地铁">
+                    </div>
+                    <div class="form-group">
+                        <label for="config-metro-en">Metro Name (EN)</label>
+                        <input type="text" id="config-metro-en" oninput="updateGlobalSetting('metroNameEn', this.value)" placeholder="例: BEIJING SUBWAY">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="config-logo-char">Logo 字母</label>
+                        <input type="text" id="config-logo-char" oninput="updateGlobalSetting('logoChar', this.value)" placeholder="例: D" maxlength="2">
+                    </div>
+                    <div class="form-group">
+                        <label>Logo 颜色</label>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="config-logo-bg" oninput="updateGlobalSetting('logoBgColor', this.value)">
+                            <span class="brand-subtitle" id="logo-color-hex" style="font-family: Arial, sans-serif;">#005A9E</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="justify-content: center;">
+                        <label class="checkbox-label" style="margin-top: 4px;">
+                            <input type="checkbox" id="config-show-logo" checked onchange="updateGlobalSetting('showLogo', this.checked)"> 显示地铁 Logo & 品牌
+                        </label>
+                    </div>
+                    <div class="form-group" id="logo-upload-group">
+                        <label>自定义 Logo 图片</label>
+                        <div style="display: flex; gap: 6px; align-items: center; margin-top: 2px;">
+                            <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.7rem; flex-grow: 1;" onclick="triggerLogoUpload()">上传</button>
+                            <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.7rem; background-color: rgba(239, 68, 68, 0.2); border: 1px solid var(--accent-red);" onclick="clearUploadedLogo()">清除</button>
+                            <input type="file" id="logo-file-input" style="display: none;" onchange="uploadLogoImage(event)" accept="image/*">
+                        </div>
+                        <span id="logo-upload-status" class="brand-subtitle" style="font-size: 0.65rem; color: var(--text-muted); margin-top: 2px; text-transform: none; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px;">未上传自定义图片</span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>线路标志色</label>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="config-line-color" oninput="updateGlobalSetting('lineThemeColor', this.value)">
+                            <span class="brand-subtitle" id="line-color-hex" style="font-family: Arial, sans-serif;">#C41230</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>已驶过轨道颜色</label>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="config-track-passed" oninput="updateGlobalSetting('passedTrackColor', this.value)">
+                            <span class="brand-subtitle" id="passed-color-hex" style="font-family: Arial, sans-serif;">#cccccc</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="config-time">顶部时间</label>
+                        <input type="text" id="config-time" oninput="updateGlobalSetting('timeText', this.value)" placeholder="2026-05-30  12:00">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="config-live-time" onchange="toggleLiveTime(this.checked)"> 实时同步系统时间
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="config-track-active">未到达轨道颜色</label>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="config-track-active" oninput="updateGlobalSetting('activeTrackColor', this.value)">
+                            <span class="brand-subtitle" id="active-color-hex" style="font-family: Arial, sans-serif;">#4CAF50</span>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="config-next-cn">下一站 (中) Override</label>
+                        <input type="text" id="config-next-cn" oninput="updateGlobalSetting('nextStationCn', this.value)" placeholder="默认自动获取">
+                    </div>
+                    <div class="form-group">
+                        <label for="config-next-en">Next Station (EN)</label>
+                        <input type="text" id="config-next-en" oninput="updateGlobalSetting('nextStationEn', this.value)" placeholder="默认自动获取">
+                    </div>
+                </div>
+                <label class="checkbox-label" style="margin-top: -8px;">
+                    <input type="checkbox" id="config-auto-next" checked onchange="toggleAutoNext(this.checked)"> 自动根据“当前站”标记生成下一站
+                </label>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="config-terminal-cn">终点站 (中)</label>
+                        <input type="text" id="config-terminal-cn" oninput="updateGlobalSetting('terminalCn', this.value)" placeholder="默认最后一站">
+                    </div>
+                    <div class="form-group">
+                        <label for="config-terminal-en">Terminal (EN)</label>
+                        <input type="text" id="config-terminal-en" oninput="updateGlobalSetting('terminalEn', this.value)" placeholder="默认最后一站">
+                    </div>
+                </div>
+                <label class="checkbox-label" style="margin-top: -8px;">
+                    <input type="checkbox" id="config-auto-term" checked onchange="toggleAutoTerminal(this.checked)"> 自动设置最后一站为终点站
+                </label>
+                <label class="checkbox-label" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px; margin-top: 4px;">
+                    <input type="checkbox" id="config-reverse-dir" onchange="updateGlobalSetting('reverseDirection', this.checked)"> <strong>反向行驶 (下行方向 / Downlink)</strong>
+                </label>
+            </div>
+
+
+
+            <!-- Export Card -->
+            <div class="glass-panel">
+                <h2>导出操作 <span class="brand-subtitle">Actions</span></h2>
+                <button class="btn btn-success" onclick="exportToImage()">
+                    <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16" style="margin-top: -2px;">
+                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                    </svg>
+                    导出高清图片 (Save Image)
+                </button>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="exportConfigJson()">导出数据</button>
+                    <button class="btn btn-outline" onclick="triggerImportConfig()">导入数据</button>
+                    <input type="file" id="import-file-input" style="display: none;" onchange="importConfigJson(event)" accept=".json">
+                </div>
+                <label class="checkbox-label" style="margin-top: -4px; margin-bottom: 4px; justify-content: center;">
+                    <input type="checkbox" id="config-rmg-compat"> RMG 兼容导入模式
+                </label>
+                <div id="config-rmg-branch-container" style="display: none; margin-top: 4px; margin-bottom: 4px; justify-content: center;">
+                    <label class="checkbox-label" style="color: var(--accent-orange); font-weight: bold; margin-top: 0;">
+                        <input type="checkbox" id="config-rmg-branch" onchange="toggleRmgBranch(this.checked)"> 驶入支线 (Enter Branch)
+                    </label>
+                </div>
+                <button class="btn btn-danger" onclick="clearAllStations()">清空站点 (Clear All)</button>
+            </div>
+
+        </div>
+
+        <!-- Main Column (Preview + Station List Editor) -->
+        <div class="main-content">
+            
+            <!-- Preview Controls Bar -->
+            <div class="preview-controls">
+                <div class="slider-group">
+                    <span>预览缩放 Zoom:</span>
+                    <input type="range" id="zoom-slider" min="0.3" max="1" step="0.05" value="0.6" oninput="updateZoom(this.value)">
+                    <span id="zoom-label">60%</span>
+                </div>
+                <div class="theme-select-group">
+                    <span>屏幕背景主题 LCD Mode:</span>
+                    <label class="checkbox-label" style="color: #fff; cursor: pointer;">
+                        <input type="checkbox" id="lcd-theme-checkbox" onchange="toggleLcdTheme(this.checked)"> 深色模拟 (Dark LCD Mode)
+                    </label>
+                </div>
+            </div>
+
+            <!-- Preview Wrapper -->
+            <div class="preview-wrapper" id="preview-wrapper">
+                <div class="preview-scale-container" id="preview-scale-container">
+                    
+                    <!-- THE LCD PANEL PREVIEW CONTAINER -->
+                    <div class="lcd-panel" id="lcd-panel">
+                        <div class="header">
+                            <div class="logo-area" id="preview-logo-area">
+                                <div class="logo-icon" id="preview-logo-icon">D</div>
+                                <div>
+                                    <span id="preview-metro-cn">北京地铁</span><br>
+                                    <span id="preview-metro-en" style="font-size:10px; font-weight:normal; margin-top:-5px; font-family:Arial, sans-serif; display:block;">BEIJING SUBWAY</span>
+                                </div>
+                            </div>
+                            
+                            <div class="time-area" id="preview-time-area">
+                                2026-05-30 &nbsp;&nbsp; 14:39
+                            </div>
+
+                            <div class="next-station-area" id="preview-next-area">
+                                <div class="cn" id="preview-next-cn">下一站：&nbsp;--</div>
+                                <div class="en" id="preview-next-en">Next Station:&nbsp; --</div>
+                            </div>
+
+                            <div class="door-area">
+                                <div class="door-icon"></div>
+                                <div class="door-icon"></div>
+                                <div class="door-text">
+                                    <span class="cn" id="preview-door-cn">本侧开门</span>
+                                    <span class="en" id="preview-door-en">Doors open on this side</span>
+                                </div>
+                            </div>
+
+                            <div class="terminal-area">
+                                <div class="terminal-text">
+                                    <span class="cn">终点站:</span>
+                                    <span class="en">Terminal:</span>
+                                </div>
+                                <div class="terminal-name">
+                                    <span class="cn" id="preview-terminal-cn">--</span>
+                                    <span class="en" id="preview-terminal-en">--</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="route-map">
+                            <div class="track-line-bg"></div>
+                            <div class="stations-container" id="lcd-stations-container">
+                                <!-- Generated Dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <!-- Station List Configurator Card -->
+            <div class="glass-panel station-editor">
+                <div class="station-editor-header">
+                    <h2>站点管理 <span class="badge" id="station-count-badge">0 站</span></h2>
+                    <button class="btn btn-success" style="padding: 6px 12px; font-size: 0.75rem;" onclick="addStation()">+ 添加站点 (Add Station)</button>
+                </div>
+                
+                <!-- Station Input Rows Container -->
+                <div class="stations-list-container" id="editor-stations-list">
+                    <!-- Dynamic rendering -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ==========================================
+       4. MODAL POPUP FOR TRANSFER LINE CONFIG
+       ========================================== -->
+    <div class="modal-overlay" id="transfer-modal" style="display: none;">
+        <div class="modal-content">
+            <h3 id="transfer-modal-title">添加换乘线路 <span class="brand-subtitle">Add Transfer Line</span></h3>
+            
+            <div class="modal-inputs" style="display: flex; flex-direction: column; gap: 12px; background: rgba(0, 0, 0, 0.15); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                <div class="form-group">
+                    <label for="trans-badge-style">标志牌样式</label>
+                    <select id="trans-badge-style" onchange="toggleBadgeStyleInputs(this.value)">
+                        <option value="standard">数字号线 (如: 10 号线)</option>
+                        <option value="rect">命名线路 (如: 昌平线 / Changping Line)</option>
+                    </select>
+                </div>
+                
+                <!-- standard inputs -->
+                <div class="form-group" id="group-trans-name-standard">
+                    <label for="custom-trans-name">线路数字/字母</label>
+                    <input type="text" id="custom-trans-name" placeholder="例: 10, 13, S1">
+                </div>
+
+                <!-- rect inputs (initially hidden) -->
+                <div class="form-group" id="group-trans-name-rect-cn" style="display: none;">
+                    <label for="custom-trans-name-cn">中文线路名</label>
+                    <input type="text" id="custom-trans-name-cn" placeholder="例: 昌平线">
+                </div>
+                <div class="form-group" id="group-trans-name-rect-en" style="display: none;">
+                    <label for="custom-trans-name-en">英文线路名</label>
+                    <input type="text" id="custom-trans-name-en" placeholder="例: Changping Line">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="custom-trans-color-hex">十六进制颜色代码</label>
+                        <input type="text" id="custom-trans-color-hex" value="#0092C7" maxlength="7" oninput="syncTransColorFromHex(this.value)">
+                    </div>
+                    <div class="form-group">
+                        <label>色彩选择</label>
+                        <div class="color-picker-wrapper" style="margin-top: 4px;">
+                            <input type="color" id="custom-trans-color" value="#0092C7" oninput="syncTransColorFromPicker(this.value)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-danger" id="btn-modal-delete-transfer" style="display: none; margin-right: auto;" onclick="deleteCurrentTransfer()">删除</button>
+                <button class="btn btn-secondary" onclick="closeTransferModal()">取消</button>
+                <button class="btn btn-success" id="btn-modal-save-transfer" onclick="saveTransferConfig()">添加</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+       5. CORE GENERATOR JAVASCRIPT LOGIC
+       ========================================== -->
+    <script>
+        // Preset default line colors for Beijing subway
+        const BJ_LINE_COLORS = {
+            '1': '#C41230', '2': '#0033A0', '4': '#008C95', '5': '#AA0061',
+            '6': '#D9A120', '7': '#FFC000', '8': '#009B77', '9': '#85C341',
+            '10': '#0092C7', '13': '#F9A825', '14': '#D4A3BE', '15': '#655A7C',
+            '16': '#6B8E23', '17': '#A0522D', '19': '#D2B48C', '亦庄线': '#E60012',
+            '昌平线': '#D00060', '房山线': '#D86018', 'S1线': '#A45A2A', '机场线': '#A3C1AD',
+            '西郊线': '#D86018'
+        };
+
+        // App State
+        let globalConfig = {
+            metroNameCn: "北京地铁",
+            metroNameEn: "BEIJING SUBWAY",
+            logoChar: "D",
+            logoBgColor: "#005A9E",
+            logoTextColor: "#ffffff",
+            showLogo: true,
+            uploadedLogoUrl: "",
+            lineThemeColor: "#C41230",
+            passedTrackColor: "#cccccc",
+            activeTrackColor: "#4CAF50",
+            timeText: "2026-05-30  14:39",
+            useLiveTime: false,
+            doorSideCn: "本侧开门",
+            doorSideEn: "Doors open on this side",
+            terminalCn: "",
+            terminalEn: "",
+            autoTerminal: true,
+            autoNextStation: true,
+            nextStationCn: "",
+            nextStationEn: "",
+            reverseDirection: false
+        };
+
+        let stationsData = [];
+        let currentlyEditingStationIndex = null;
+        let currentlyEditingTransferIndex = null;
+        let lastImportedRmgJson = null;
+        let clockTimer = null;
+
+        // Templates Data
+        const PRESETS = {
+            line1: {
+                config: {
+                    metroNameCn: "北京地铁",
+                    metroNameEn: "BEIJING SUBWAY",
+                    logoChar: "D",
+                    logoBgColor: "#005A9E",
+                    logoTextColor: "#ffffff",
+                    showLogo: true,
+                    uploadedLogoUrl: "",
+                    lineThemeColor: "#C41230",
+                    passedTrackColor: "#cccccc",
+                    activeTrackColor: "#4CAF50",
+                    timeText: "2026-05-30  14:39",
+                    useLiveTime: false,
+                    doorSideCn: "本侧开门",
+                    doorSideEn: "Doors open on this side",
+                    terminalCn: "",
+                    terminalEn: "",
+                    autoTerminal: true,
+                    autoNextStation: true,
+                    nextStationCn: "",
+                    nextStationEn: "",
+                    reverseDirection: false
+                },
+                stations: [
+                    { cn: "苹果园", en: "Pingguoyuan", status: "passed", transfers: [] },
+                    { cn: "古城", en: "Gucheng", status: "passed", transfers: [] },
+                    { cn: "八角游乐园", en: "Bajiao Amusement Park", status: "current", transfers: [] },
+                    { cn: "八宝山", en: "Babaoshan", status: "future", transfers: [] },
+                    { cn: "玉泉路", en: "Yuquan Lu", status: "future", transfers: [] },
+                    { cn: "五棵松", en: "Wukesong", status: "future", transfers: [] },
+                    { cn: "万寿路", en: "Wanshou Lu", status: "future", transfers: [] },
+                    { cn: "公主坟", en: "Gongzhufen", status: "future", transfers: [{ line: "10", color: "#0092C7" }] },
+                    { cn: "军事博物馆", en: "Military Museum", status: "future", transfers: [{ line: "9", color: "#85C341" }] },
+                    { cn: "木樨地", en: "Muxidi", status: "future", transfers: [] },
+                    { cn: "南礼士路", en: "Nanlishi Lu", status: "future", transfers: [] },
+                    { cn: "复兴门", en: "Fuxingmen", status: "future", transfers: [{ line: "2", color: "#0033A0" }] },
+                    { cn: "西单", en: "Xidan", status: "future", transfers: [{ line: "4", color: "#008C95" }] },
+                    { cn: "天安门西", en: "Tian'anmen Xi(W)", status: "future", transfers: [] },
+                    { cn: "天安门东", en: "Tian'anmen Dong(E)", status: "future", transfers: [] },
+                    { cn: "王府井", en: "Wangfujing", status: "future", transfers: [{ line: "8", color: "#009B77" }] },
+                    { cn: "东单", en: "Dongdan", status: "future", transfers: [{ line: "5", color: "#AA0061" }] },
+                    { cn: "建国门", en: "Jianguomen", status: "future", transfers: [{ line: "2", color: "#0033A0" }] },
+                    { cn: "永安里", en: "Yong'an Li", status: "future", transfers: [] },
+                    { cn: "国贸", en: "Guomao", status: "future", transfers: [{ line: "10", color: "#0092C7" }] },
+                    { cn: "大望路", en: "Dawang Lu", status: "future", transfers: [{ line: "14", color: "#D4A3BE" }] },
+                    { cn: "四惠", en: "Sihui", status: "future", transfers: [] },
+                    { cn: "四惠东", en: "Sihui Dong(E)", status: "future", transfers: [] },
+                    { cn: "高碑店", en: "Gaobeidian", status: "future", transfers: [] },
+                    { cn: "传媒大学", en: "Communication Univ. of China", status: "future", transfers: [] },
+                    { cn: "双桥", en: "Shuangqiao", status: "future", transfers: [] },
+                    { cn: "管庄", en: "Guanzhuang", status: "future", transfers: [] },
+                    { cn: "八里桥", en: "Bali Qiao", status: "future", transfers: [] },
+                    { cn: "通州北苑", en: "Tongzhou Beiyuan", status: "future", transfers: [] },
+                    { cn: "果园", en: "Guoyuan", status: "future", transfers: [] },
+                    { cn: "九棵树", en: "Jiukeshu", status: "future", transfers: [] },
+                    { cn: "梨园", en: "Liyuan", status: "future", transfers: [] },
+                    { cn: "临河里", en: "Linheli", status: "future", transfers: [] },
+                    { cn: "土桥", en: "Tuqiao", status: "future", transfers: [] },
+                    { cn: "花庄", en: "Huazhuang", status: "future", transfers: [{ line: "7", color: "#FFC000" }] },
+                    { cn: "环球度假区", en: "Universal Resort", status: "future", transfers: [{ line: "7", color: "#FFC000" }] }
+                ]
+            },
+            line10: {
+                config: {
+                    metroNameCn: "北京地铁",
+                    metroNameEn: "BEIJING SUBWAY",
+                    logoChar: "D",
+                    logoBgColor: "#005A9E",
+                    logoTextColor: "#ffffff",
+                    showLogo: true,
+                    uploadedLogoUrl: "",
+                    lineThemeColor: "#0092C7",
+                    passedTrackColor: "#cccccc",
+                    activeTrackColor: "#0092C7",
+                    timeText: "2026-05-30  14:39",
+                    useLiveTime: false,
+                    doorSideCn: "本侧开门",
+                    doorSideEn: "Doors open on this side",
+                    terminalCn: "",
+                    terminalEn: "",
+                    autoTerminal: true,
+                    autoNextStation: true,
+                    nextStationCn: "",
+                    nextStationEn: "",
+                    reverseDirection: false
+                },
+                stations: [
+                    { cn: "巴沟", en: "Bagou", status: "passed", transfers: [{ line: "西郊线", color: "#D86018" }] },
+                    { cn: "苏州街", en: "Suzhou Jie", status: "passed", transfers: [] },
+                    { cn: "海淀黄庄", en: "Haidian Huangzhuang", status: "current", transfers: [{ line: "4", color: "#008C95" }] },
+                    { cn: "知春里", en: "Zhichunli", status: "future", transfers: [] },
+                    { cn: "知春路", en: "Zhichun Lu", status: "future", transfers: [{ line: "13", color: "#F9A825" }] },
+                    { cn: "西土城", en: "Xitucheng", status: "future", transfers: [] },
+                    { cn: "牡丹园", en: "Mudanyuan", status: "future", transfers: [{ line: "19", color: "#D2B48C" }] },
+                    { cn: "健德门", en: "Jiandemen", status: "future", transfers: [] },
+                    { cn: "北土城", en: "Beitucheng", status: "future", transfers: [{ line: "8", color: "#009B77" }] },
+                    { cn: "安贞门", en: "Anzhenmen", status: "future", transfers: [] }
+                ]
+            },
+            blank: {
+                config: {
+                    metroNameCn: "都市地铁",
+                    metroNameEn: "METRO TRANSIT",
+                    logoChar: "M",
+                    logoBgColor: "#1e3a8a",
+                    logoTextColor: "#ffffff",
+                    showLogo: true,
+                    uploadedLogoUrl: "",
+                    lineThemeColor: "#3b82f6",
+                    passedTrackColor: "#cccccc",
+                    activeTrackColor: "#10b981",
+                    timeText: "2026-05-30  14:39",
+                    useLiveTime: false,
+                    doorSideCn: "本侧开门",
+                    doorSideEn: "Doors open on this side",
+                    terminalCn: "",
+                    terminalEn: "",
+                    autoTerminal: true,
+                    autoNextStation: true,
+                    nextStationCn: "",
+                    nextStationEn: "",
+                    reverseDirection: false
+                },
+                stations: [
+                    { cn: "始发站", en: "Start Station", status: "current", transfers: [] },
+                    { cn: "终点站", en: "Terminal Station", status: "future", transfers: [] }
+                ]
+            }
+        };
+
+        // Initialize App on DOM Ready
+        window.addEventListener('DOMContentLoaded', () => {
+            loadPreset('line1'); // Load Line 1 default template
+            updateZoom(0.6); // Default 60% fits desktop displays nicely
+        });
+
+        // 1. Zoom Controls
+        function updateZoom(val) {
+            const zoomVal = parseFloat(val);
+            const scaleContainer = document.getElementById('preview-scale-container');
+            const wrapper = document.getElementById('preview-wrapper');
+            
+            // Set styles
+            scaleContainer.style.transform = `scale(${zoomVal})`;
+            document.getElementById('zoom-slider').value = zoomVal;
+            document.getElementById('zoom-label').textContent = `${Math.round(zoomVal * 100)}%`;
+            
+            // Adjust dimensions to fit the scaled element nicely in the scroll parent
+            const panelWidth = 1550;
+            const panelHeight = 460;
+            scaleContainer.style.width = `${panelWidth}px`;
+            scaleContainer.style.height = `${panelHeight}px`;
+            
+            // The scaled dimensions
+            const scaledWidth = panelWidth * zoomVal;
+            const scaledHeight = panelHeight * zoomVal;
+            
+            // We set an invisible block in the wrapper with scaled dimensions to force correct container size & scroll bars
+            wrapper.style.minHeight = `${scaledHeight + 60}px`;
+        }
+
+        // Toggle Dark LCD screen theme
+        function toggleLcdTheme(isDark) {
+            const previewWrapper = document.getElementById('preview-wrapper');
+            if (isDark) {
+                previewWrapper.classList.add('lcd-dark-theme');
+            } else {
+                previewWrapper.classList.remove('lcd-dark-theme');
+            }
+        }
+
+        // Logo Upload Actions
+        function triggerLogoUpload() {
+            document.getElementById('logo-file-input').click();
+        }
+
+        function uploadLogoImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                globalConfig.uploadedLogoUrl = e.target.result;
+                const statusSpan = document.getElementById('logo-upload-status');
+                statusSpan.textContent = file.name;
+                statusSpan.title = file.name;
+                renderPreview();
+            };
+            reader.readAsDataURL(file);
+            event.target.value = ''; // reset
+        }
+
+        function clearUploadedLogo() {
+            globalConfig.uploadedLogoUrl = "";
+            document.getElementById('logo-upload-status').textContent = "未上传自定义图片";
+            document.getElementById('logo-upload-status').title = "";
+            renderPreview();
+        }
+
+        // 2. Global State Updaters
+        function updateGlobalSetting(key, val) {
+            globalConfig[key] = val;
+            
+            // Sync specific hex value labels
+            if (key === 'logoBgColor') document.getElementById('logo-color-hex').textContent = val;
+            if (key === 'lineThemeColor') document.getElementById('line-color-hex').textContent = val;
+            if (key === 'passedTrackColor') document.getElementById('passed-color-hex').textContent = val;
+            if (key === 'activeTrackColor') document.getElementById('active-color-hex').textContent = val;
+            
+            if (key === 'autoTerminal' || key === 'autoNextStation') {
+                updateDynamicHeaders();
+            }
+
+            if (key === 'reverseDirection') {
+                // Invert statuses of stations: passed <-> future
+                stationsData.forEach(st => {
+                    if (st.status === 'passed') {
+                        st.status = 'future';
+                    } else if (st.status === 'future') {
+                        st.status = 'passed';
+                    }
+                });
+                updateDynamicHeaders();
+                renderStationEditor();
+            }
+
+            renderPreview();
+        }
+
+        function toggleAutoTerminal(checked) {
+            globalConfig.autoTerminal = checked;
+            const termCnInput = document.getElementById('config-terminal-cn');
+            const termEnInput = document.getElementById('config-terminal-en');
+            
+            if (checked) {
+                termCnInput.disabled = true;
+                termEnInput.disabled = true;
+                updateDynamicHeaders();
+            } else {
+                termCnInput.disabled = false;
+                termEnInput.disabled = false;
+            }
+            renderPreview();
+        }
+
+        function toggleAutoNext(checked) {
+            globalConfig.autoNextStation = checked;
+            const nextCnInput = document.getElementById('config-next-cn');
+            const nextEnInput = document.getElementById('config-next-en');
+            
+            if (checked) {
+                nextCnInput.disabled = true;
+                nextEnInput.disabled = true;
+                updateDynamicHeaders();
+            } else {
+                nextCnInput.disabled = false;
+                nextEnInput.disabled = false;
+            }
+            renderPreview();
+        }
+
+        // Clock Sync
+        function toggleLiveTime(checked) {
+            globalConfig.useLiveTime = checked;
+            const timeInput = document.getElementById('config-time');
+            
+            if (checked) {
+                timeInput.disabled = true;
+                if (clockTimer) clearInterval(clockTimer);
+                
+                const updateClock = () => {
+                    const now = new Date();
+                    const year = now.getFullYear();
+                    const month = String(now.getMonth() + 1).padStart(2, '0');
+                    const day = String(now.getDate()).padStart(2, '0');
+                    const hours = String(now.getHours()).padStart(2, '0');
+                    const minutes = String(now.getMinutes()).padStart(2, '0');
+                    
+                    globalConfig.timeText = `${year}-${month}-${day}   ${hours}:${minutes}`;
+                    
+                    // Update DOM directly without full redraw to prevent layout flicker
+                    const timePreview = document.getElementById('preview-time-area');
+                    if (timePreview) {
+                        timePreview.innerHTML = `${year}-${month}-${day} &nbsp;&nbsp; ${hours}:${minutes}`;
+                    }
+                    timeInput.value = globalConfig.timeText;
+                };
+                
+                updateClock();
+                clockTimer = setInterval(updateClock, 1000);
+            } else {
+                timeInput.disabled = false;
+                if (clockTimer) {
+                    clearInterval(clockTimer);
+                    clockTimer = null;
+                }
+            }
+        }
+
+        // Update Dynamic Header Values (Terminal & Next Station)
+        function updateDynamicHeaders() {
+            // Calculate Terminal Station (depends on direction if auto)
+            if (globalConfig.autoTerminal) {
+                if (stationsData.length > 0) {
+                    // Symmetrical check: Standard terminal is the last station, Reverse terminal is the first station
+                    const targetStation = globalConfig.reverseDirection ? stationsData[0] : stationsData[stationsData.length - 1];
+                    globalConfig.terminalCn = targetStation.cn || "--";
+                    globalConfig.terminalEn = targetStation.en || "--";
+                } else {
+                    globalConfig.terminalCn = "--";
+                    globalConfig.terminalEn = "--";
+                }
+                
+                document.getElementById('config-terminal-cn').value = globalConfig.terminalCn;
+                document.getElementById('config-terminal-en').value = globalConfig.terminalEn;
+            }
+
+            // Calculate Next Station
+            if (globalConfig.autoNextStation) {
+                const currentStation = stationsData.find(st => st.status === 'current');
+                if (currentStation) {
+                    globalConfig.nextStationCn = currentStation.cn || "--";
+                    globalConfig.nextStationEn = currentStation.en || "--";
+                } else {
+                    // Fallback to closest future station if no current marker is found
+                    let fallbackStation = null;
+                    if (globalConfig.reverseDirection) {
+                        // Going from right to left, upcoming stations have smaller indices.
+                        // The closest upcoming is the one with the HIGHEST index among future stations.
+                        for (let i = stationsData.length - 1; i >= 0; i--) {
+                            if (stationsData[i].status === 'future') {
+                                fallbackStation = stationsData[i];
+                                break;
+                            }
+                        }
+                    } else {
+                        // Going from left to right, closest upcoming is the first future station.
+                        fallbackStation = stationsData.find(st => st.status === 'future');
+                    }
+
+                    if (fallbackStation) {
+                        globalConfig.nextStationCn = fallbackStation.cn || "--";
+                        globalConfig.nextStationEn = fallbackStation.en || "--";
+                    } else {
+                        globalConfig.nextStationCn = "--";
+                        globalConfig.nextStationEn = "--";
+                    }
+                }
+                
+                document.getElementById('config-next-cn').value = globalConfig.nextStationCn;
+                document.getElementById('config-next-en').value = globalConfig.nextStationEn;
+            }
+        }
+
+        // Sync Forms UI from State
+        function syncFormInputs() {
+            document.getElementById('config-metro-cn').value = globalConfig.metroNameCn;
+            document.getElementById('config-metro-en').value = globalConfig.metroNameEn;
+            document.getElementById('config-logo-char').value = globalConfig.logoChar;
+            
+            document.getElementById('config-logo-bg').value = globalConfig.logoBgColor;
+            document.getElementById('logo-color-hex').textContent = globalConfig.logoBgColor;
+            
+            document.getElementById('config-line-color').value = globalConfig.lineThemeColor;
+            document.getElementById('line-color-hex').textContent = globalConfig.lineThemeColor;
+            
+            document.getElementById('config-track-passed').value = globalConfig.passedTrackColor;
+            document.getElementById('passed-color-hex').textContent = globalConfig.passedTrackColor;
+            
+            document.getElementById('config-track-active').value = globalConfig.activeTrackColor;
+            document.getElementById('active-color-hex').textContent = globalConfig.activeTrackColor;
+            
+            document.getElementById('config-time').value = globalConfig.timeText;
+            document.getElementById('config-live-time').checked = globalConfig.useLiveTime;
+            
+
+            
+            document.getElementById('config-auto-next').checked = globalConfig.autoNextStation;
+            document.getElementById('config-next-cn').disabled = globalConfig.autoNextStation;
+            document.getElementById('config-next-cn').value = globalConfig.nextStationCn;
+            document.getElementById('config-next-en').disabled = globalConfig.autoNextStation;
+            document.getElementById('config-next-en').value = globalConfig.nextStationEn;
+            
+            document.getElementById('config-auto-term').checked = globalConfig.autoTerminal;
+            document.getElementById('config-terminal-cn').disabled = globalConfig.autoTerminal;
+            document.getElementById('config-terminal-cn').value = globalConfig.terminalCn;
+            document.getElementById('config-terminal-en').disabled = globalConfig.autoTerminal;
+            document.getElementById('config-terminal-en').value = globalConfig.terminalEn;
+            
+            document.getElementById('config-reverse-dir').checked = globalConfig.reverseDirection;
+
+            // Sync new fields
+            document.getElementById('config-show-logo').checked = globalConfig.showLogo !== false;
+            
+            const uploadStatus = document.getElementById('logo-upload-status');
+            if (globalConfig.uploadedLogoUrl) {
+                uploadStatus.textContent = "已加载自定义图片";
+            } else {
+                uploadStatus.textContent = "未上传自定义图片";
+            }
+        }
+
+        // Load Preset Line Data
+        function loadPreset(presetKey) {
+            const data = PRESETS[presetKey];
+            if (!data) return;
+
+            // Reset RMG branch variables
+            lastImportedRmgJson = null;
+            const branchContainer = document.getElementById('config-rmg-branch-container');
+            if (branchContainer) branchContainer.style.display = 'none';
+            const branchCb = document.getElementById('config-rmg-branch');
+            if (branchCb) branchCb.checked = false;
+
+            // Deep clone globalConfig
+            globalConfig = JSON.parse(JSON.stringify(data.config));
+            // Deep clone stations
+            stationsData = JSON.parse(JSON.stringify(data.stations));
+            
+            // If live time is running, stop it first or restart it
+            toggleLiveTime(globalConfig.useLiveTime);
+            
+            updateDynamicHeaders();
+            syncFormInputs();
+            renderAll();
+        }
+
+        // Clear All
+        function clearAllStations() {
+            if (confirm("确定要清空所有站点吗？")) {
+                // Reset RMG branch variables
+                lastImportedRmgJson = null;
+                const branchContainer = document.getElementById('config-rmg-branch-container');
+                if (branchContainer) branchContainer.style.display = 'none';
+                const branchCb = document.getElementById('config-rmg-branch');
+                if (branchCb) branchCb.checked = false;
+
+                stationsData = [
+                    { cn: "起点站", en: "First Station", status: "current", transfers: [] },
+                    { cn: "终点站", en: "Terminal Station", status: "future", transfers: [] }
+                ];
+                updateDynamicHeaders();
+                renderAll();
+            }
+        }
+
+        // 3. Stations State Manager
+        function addStation() {
+            stationsData.push({
+                cn: "新站点",
+                en: "New Station",
+                status: "future",
+                transfers: []
+            });
+            updateDynamicHeaders();
+            renderAll();
+            
+            // Scroll to bottom of station editor list
+            setTimeout(() => {
+                const list = document.getElementById('editor-stations-list');
+                list.scrollTop = list.scrollHeight;
+            }, 100);
+        }
+
+        function deleteStation(index) {
+            if (stationsData.length <= 2) {
+                alert("地铁线路至少需要保留 2 个站点！");
+                return;
+            }
+            stationsData.splice(index, 1);
+            updateDynamicHeaders();
+            renderAll();
+        }
+
+        function moveStation(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= stationsData.length) return;
+            
+            // Swap array positions
+            const temp = stationsData[index];
+            stationsData[index] = stationsData[newIndex];
+            stationsData[newIndex] = temp;
+            
+            updateDynamicHeaders();
+            renderAll();
+        }
+
+        // Inline input typing (oninput)
+        function updateStationField(index, field, value) {
+            stationsData[index][field] = value;
+            
+            // Handle logical cascading when station status is changed to "current"
+            if (field === 'status' && value === 'current') {
+                stationsData.forEach((st, idx) => {
+                    if (idx !== index && st.status !== 'closed') {
+                        if (!globalConfig.reverseDirection) {
+                            // Uplink: Earlier stations are passed, later stations are future
+                            st.status = idx < index ? 'passed' : 'future';
+                        } else {
+                            // Downlink: Earlier stations are future, later stations are passed
+                            st.status = idx < index ? 'future' : 'passed';
+                        }
+                    }
+                });
+                
+                updateDynamicHeaders();
+                renderAll(); // Need full redraw to sync editor select boxes
+                return;
+            }
+
+            updateDynamicHeaders();
+            renderPreview();
+        }
+
+        // 4. Custom Transfers Config Modal
+        function toggleBadgeStyleInputs(style) {
+            const groupStandard = document.getElementById('group-trans-name-standard');
+            const groupRectCn = document.getElementById('group-trans-name-rect-cn');
+            const groupRectEn = document.getElementById('group-trans-name-rect-en');
+            
+            if (style === 'standard') {
+                groupStandard.style.display = 'block';
+                groupRectCn.style.display = 'none';
+                groupRectEn.style.display = 'none';
+            } else {
+                groupStandard.style.display = 'none';
+                groupRectCn.style.display = 'block';
+                groupRectEn.style.display = 'block';
+            }
+        }
+
+        function syncTransColorFromHex(hex) {
+            const reg = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+            if (reg.test(hex)) {
+                document.getElementById('custom-trans-color').value = hex;
+            }
+        }
+
+        function syncTransColorFromPicker(color) {
+            document.getElementById('custom-trans-color-hex').value = color;
+        }
+
+        function openTransferModal(stationIdx) {
+            currentlyEditingStationIndex = stationIdx;
+            currentlyEditingTransferIndex = null;
+            
+            // Set labels & title
+            document.getElementById('transfer-modal-title').innerHTML = '添加换乘线路 <span class="brand-subtitle">Add Transfer Line</span>';
+            document.getElementById('btn-modal-save-transfer').textContent = '添加';
+            document.getElementById('btn-modal-delete-transfer').style.display = 'none';
+
+            // Reset modal inputs
+            document.getElementById('trans-badge-style').value = 'standard';
+            toggleBadgeStyleInputs('standard');
+            
+            document.getElementById('custom-trans-name').value = '';
+            document.getElementById('custom-trans-name-cn').value = '';
+            document.getElementById('custom-trans-name-en').value = '';
+            document.getElementById('custom-trans-color').value = '#0092C7';
+            document.getElementById('custom-trans-color-hex').value = '#0092C7';
+            
+            document.getElementById('transfer-modal').style.display = 'flex';
+        }
+
+        function openEditTransferModal(stationIdx, transferIdx) {
+            currentlyEditingStationIndex = stationIdx;
+            currentlyEditingTransferIndex = transferIdx;
+            
+            // Set labels & title
+            document.getElementById('transfer-modal-title').innerHTML = '编辑换乘线路 <span class="brand-subtitle">Edit Transfer Line</span>';
+            document.getElementById('btn-modal-save-transfer').textContent = '保存';
+            document.getElementById('btn-modal-delete-transfer').style.display = 'block';
+
+            const trans = stationsData[stationIdx].transfers[transferIdx];
+            const style = trans.style || 'standard';
+            
+            document.getElementById('trans-badge-style').value = style;
+            toggleBadgeStyleInputs(style);
+            
+            if (style === 'standard') {
+                document.getElementById('custom-trans-name').value = trans.line || '';
+                document.getElementById('custom-trans-name-cn').value = '';
+                document.getElementById('custom-trans-name-en').value = '';
+            } else {
+                document.getElementById('custom-trans-name').value = '';
+                document.getElementById('custom-trans-name-cn').value = trans.cn || '';
+                document.getElementById('custom-trans-name-en').value = trans.en || '';
+            }
+            
+            const color = trans.color || '#0092C7';
+            document.getElementById('custom-trans-color').value = color;
+            document.getElementById('custom-trans-color-hex').value = color;
+            
+            document.getElementById('transfer-modal').style.display = 'flex';
+        }
+
+        function closeTransferModal() {
+            document.getElementById('transfer-modal').style.display = 'none';
+            currentlyEditingStationIndex = null;
+            currentlyEditingTransferIndex = null;
+        }
+
+        function deleteCurrentTransfer() {
+            if (currentlyEditingStationIndex !== null && currentlyEditingTransferIndex !== null) {
+                if (stationsData[currentlyEditingStationIndex] && stationsData[currentlyEditingStationIndex].transfers) {
+                    stationsData[currentlyEditingStationIndex].transfers.splice(currentlyEditingTransferIndex, 1);
+                }
+                renderAll();
+                closeTransferModal();
+            }
+        }
+
+        // Save customized transfer config (standard vs rect, add vs edit)
+        function saveTransferConfig() {
+            const style = document.getElementById('trans-badge-style').value;
+            const color = document.getElementById('custom-trans-color').value;
+            
+            let transferObj = { style: style, color: color };
+            
+            if (style === 'standard') {
+                const name = document.getElementById('custom-trans-name').value.trim();
+                if (!name) {
+                    alert("请输入线路数字/字母！");
+                    return;
+                }
+                transferObj.line = name;
+            } else {
+                const cnName = document.getElementById('custom-trans-name-cn').value.trim();
+                const enName = document.getElementById('custom-trans-name-en').value.trim();
+                if (!cnName || !enName) {
+                    alert("请输入中文和英文线路名称！");
+                    return;
+                }
+                transferObj.cn = cnName;
+                transferObj.en = enName;
+            }
+
+            if (currentlyEditingStationIndex !== null) {
+                if (!stationsData[currentlyEditingStationIndex].transfers) {
+                    stationsData[currentlyEditingStationIndex].transfers = [];
+                }
+                
+                if (currentlyEditingTransferIndex !== null) {
+                    stationsData[currentlyEditingStationIndex].transfers[currentlyEditingTransferIndex] = transferObj;
+                } else {
+                    stationsData[currentlyEditingStationIndex].transfers.push(transferObj);
+                }
+                
+                renderAll();
+                closeTransferModal();
+            }
+        }
+
+        // 5. Render Core Preview Screen
+        function renderPreview() {
+            // Apply theme colors globally on panel
+            const panel = document.getElementById('lcd-panel');
+            panel.style.setProperty('--line-color', globalConfig.lineThemeColor);
+            panel.style.setProperty('--logo-bg-color', globalConfig.logoBgColor);
+            panel.style.setProperty('--logo-text-color', globalConfig.logoTextColor);
+            panel.style.setProperty('--passed-color', globalConfig.passedTrackColor);
+            panel.style.setProperty('--active-color', globalConfig.activeTrackColor);
+
+            // 1. Header elements
+            const logoArea = document.getElementById('preview-logo-area');
+            if (logoArea) {
+                logoArea.style.display = globalConfig.showLogo !== false ? 'flex' : 'none';
+            }
+
+            const previewLogoIcon = document.getElementById('preview-logo-icon');
+            if (previewLogoIcon) {
+                if (globalConfig.uploadedLogoUrl) {
+                    previewLogoIcon.style.border = 'none';
+                    previewLogoIcon.style.backgroundColor = 'transparent';
+                    previewLogoIcon.innerHTML = `<img src="${globalConfig.uploadedLogoUrl}" alt="Logo">`;
+                } else {
+                    previewLogoIcon.style.border = `3px solid ${globalConfig.logoBgColor}`;
+                    previewLogoIcon.style.backgroundColor = globalConfig.logoBgColor;
+                    previewLogoIcon.style.color = globalConfig.logoTextColor;
+                    previewLogoIcon.innerHTML = globalConfig.logoChar;
+                }
+            }
+
+            document.getElementById('preview-metro-cn').textContent = globalConfig.metroNameCn;
+            
+            // Check EN text height blocking
+            const metroEnEl = document.getElementById('preview-metro-en');
+            metroEnEl.textContent = globalConfig.metroNameEn;
+
+            // Render Time
+            if (!globalConfig.useLiveTime) {
+                document.getElementById('preview-time-area').innerHTML = globalConfig.timeText.replace(/  /g, '&nbsp;&nbsp;');
+            }
+
+            // Next station (Next Station area uses clip path layout, matches v16)
+            const nextCnText = globalConfig.nextStationCn && globalConfig.nextStationCn !== '--' ? `下一站：&nbsp;${globalConfig.nextStationCn}` : '下一站：&nbsp;--';
+            const nextEnText = globalConfig.nextStationEn && globalConfig.nextStationEn !== '--' ? `Next Station:&nbsp; ${globalConfig.nextStationEn}` : 'Next Station:&nbsp; --';
+            document.getElementById('preview-next-cn').innerHTML = nextCnText;
+            document.getElementById('preview-next-en').innerHTML = nextEnText;
+
+            // Doors side
+            document.getElementById('preview-door-cn').textContent = "本侧开门";
+            document.getElementById('preview-door-en').textContent = "Doors open on this side";
+
+            // Terminal
+            document.getElementById('preview-terminal-cn').textContent = globalConfig.terminalCn || '--';
+            document.getElementById('preview-terminal-en').textContent = globalConfig.terminalEn || '--';
+
+            // 2. Stations Nodes Render
+            const container = document.getElementById('lcd-stations-container');
+            container.innerHTML = '';
+
+            stationsData.forEach((station, index) => {
+                const node = document.createElement('div');
+                node.className = `station-node ${station.status || 'future'}`;
+                
+                // Transfers render
+                let transferHtml = '<div class="transfer-area">';
+                if (station.transfers && station.transfers.length > 0) {
+                    station.transfers.forEach(trans => {
+                        const style = trans.style || "standard";
+                        if (style === "standard") {
+                            const isDoubleDigit = trans.line.length > 1;
+                            const digitClass = isDoubleDigit ? 'double-digit' : '';
+                            transferHtml += `
+                                <div class="transfer-box" style="background-color: ${trans.color}">
+                                    <div class="transfer-num"><span class="${digitClass}">${trans.line}</span></div>
+                                    <div class="transfer-text-group">
+                                        <div class="cn">号线</div>
+                                        <div class="en">Line ${trans.line}</div>
+                                    </div>
+                                </div>
+                                <div class="transfer-arrow" style="border-top-color: ${trans.color}"></div>
+                            `;
+                        } else if (style === "rect") {
+                            transferHtml += `
+                                <div class="transfer-box-rect" style="background-color: ${trans.color}">
+                                    <div class="cn">${trans.cn}</div>
+                                    <div class="en">${trans.en}</div>
+                                </div>
+                                <div class="transfer-arrow" style="border-top-color: ${trans.color}"></div>
+                            `;
+                        }
+                    });
+                }
+                transferHtml += '</div>';
+
+                // Chinese characters layout (joined by <br> for vertical writing)
+                let safeChineseName = station.cn.split('').join('<br>');
+                let englishName = station.en;
+                
+                // If the station is closed (暂缓开通), append specific layout elements
+                if (station.status === 'closed') {
+                    safeChineseName += `<div class="closed-label">暂缓<br>开通</div>`;
+                    englishName += ' (Closed)';
+                }
+
+                node.innerHTML = `
+                    ${transferHtml}
+                    <div class="dot-container">
+                        <div class="dot-outer">
+                            <div class="dot-inner"></div>
+                        </div>
+                    </div>
+                    <div class="name-area">
+                        <div class="name-cn">${safeChineseName}</div>
+                        <div class="name-en">${englishName}</div>
+                    </div>
+                `;
+                container.appendChild(node);
+            });
+
+            // 3. Dynamic route map track calculation (solid segments)
+            const track = document.querySelector('.lcd-panel .track-line-bg');
+            if (track) {
+                track.innerHTML = '';
+                const N = stationsData.length;
+                if (N > 1) {
+                    let currentIdx = -1;
+                    stationsData.forEach((st, idx) => {
+                        if (st.status === 'current') currentIdx = idx;
+                    });
+
+                    const allPassed = stationsData.every(st => st.status === 'passed' || st.status === 'closed');
+                    const allFuture = stationsData.every(st => st.status === 'future' || st.status === 'closed');
+
+                    for (let i = 0; i < N - 1; i++) {
+                        let color = globalConfig.activeTrackColor; // Default green
+
+                        if (allPassed) {
+                            color = globalConfig.passedTrackColor;
+                        } else if (allFuture) {
+                            color = globalConfig.activeTrackColor;
+                        } else if (currentIdx !== -1) {
+                            if (!globalConfig.reverseDirection) {
+                                // Uplink: Segment i is passed (grey) if i < currentIdx
+                                if (i < currentIdx) {
+                                    color = globalConfig.passedTrackColor;
+                                } else {
+                                    color = globalConfig.activeTrackColor;
+                                }
+                            } else {
+                                // Downlink: Segment i is passed (grey) if i >= currentIdx
+                                if (i >= currentIdx) {
+                                    color = globalConfig.passedTrackColor;
+                                } else {
+                                    color = globalConfig.activeTrackColor;
+                                }
+                            }
+                        } else {
+                            // Fallback if no current station
+                            let lastPassedIdx = -1;
+                            if (!globalConfig.reverseDirection) {
+                                stationsData.forEach((st, idx) => {
+                                    if (st.status === 'passed') lastPassedIdx = idx;
+                                });
+                                if (i < lastPassedIdx) {
+                                    color = globalConfig.passedTrackColor;
+                                } else {
+                                    color = globalConfig.activeTrackColor;
+                                }
+                            } else {
+                                // Downlink fallback: Find first passed index from left
+                                let firstPassedIdx = -1;
+                                for (let idx = 0; idx < N; idx++) {
+                                    if (stationsData[idx].status === 'passed') {
+                                        firstPassedIdx = idx;
+                                        break;
+                                    }
+                                }
+                                if (firstPassedIdx !== -1 && i >= firstPassedIdx) {
+                                    color = globalConfig.passedTrackColor;
+                                } else {
+                                    color = globalConfig.activeTrackColor;
+                                }
+                            }
+                        }
+
+                        const segment = document.createElement('div');
+                        segment.style.position = 'absolute';
+                        segment.style.top = '0';
+                        segment.style.height = '100%';
+                        segment.style.left = `${(i / (N - 1)) * 100}%`;
+                        // Overlap by 1px to prevent sub-pixel gap lines in browser scaling
+                        segment.style.width = `calc(${(1 / (N - 1)) * 100}% + 1px)`;
+                        segment.style.backgroundColor = color;
+                        track.appendChild(segment);
+                    }
+                }
+            }
+        }
+
+        // Render station editor list rows
+        function renderStationEditor() {
+            const listContainer = document.getElementById('editor-stations-list');
+            listContainer.innerHTML = '';
+            
+            stationsData.forEach((station, index) => {
+                const row = document.createElement('div');
+                row.className = 'station-edit-row';
+                
+                // Transfers badges
+                let transfersHtml = '';
+                if (station.transfers && station.transfers.length > 0) {
+                    station.transfers.forEach((trans, tIdx) => {
+                        const style = trans.style || "standard";
+                        const displayText = style === "standard" ? trans.line : trans.cn;
+                        transfersHtml += `
+                            <span class="edit-transfer-badge" style="background-color: ${trans.color};" title="点击编辑" onclick="openEditTransferModal(${index}, ${tIdx})">
+                                ${displayText}
+                            </span>
+                        `;
+                    });
+                }
+                
+                row.innerHTML = `
+                    <div class="row-handle">
+                        <button class="btn-icon" onclick="moveStation(${index}, -1)" ${index === 0 ? 'disabled' : ''} title="向上移动">▲</button>
+                        <button class="btn-icon" onclick="moveStation(${index}, 1)" ${index === stationsData.length - 1 ? 'disabled' : ''} title="向下移动">▼</button>
+                    </div>
+                    <div class="row-inputs">
+                        <input type="text" class="input-cn" value="${station.cn}" placeholder="站名" oninput="updateStationField(${index}, 'cn', this.value)">
+                        <input type="text" class="input-en" value="${station.en}" placeholder="English" oninput="updateStationField(${index}, 'en', this.value)">
+                    </div>
+                    <div class="row-status">
+                        <select onchange="updateStationField(${index}, 'status', this.value)">
+                            <option value="passed" ${station.status === 'passed' ? 'selected' : ''}>已驶过 (Passed)</option>
+                            <option value="current" ${station.status === 'current' ? 'selected' : ''}>当前/下一站 (Current)</option>
+                            <option value="future" ${station.status === 'future' || !station.status ? 'selected' : ''}>未到达 (Future)</option>
+                            <option value="closed" ${station.status === 'closed' ? 'selected' : ''}>暂缓开通 (Skip)</option>
+                        </select>
+                    </div>
+                    <div class="row-transfers">
+                        <div class="edit-transfers-container">
+                            ${transfersHtml}
+                        </div>
+                        <button class="btn-add-transfer" onclick="openTransferModal(${index})">+ 换乘</button>
+                    </div>
+                    <div class="row-actions">
+                        <button class="btn-delete" onclick="deleteStation(${index})" title="删除此站">&times;</button>
+                    </div>
+                `;
+                listContainer.appendChild(row);
+            });
+            
+            document.getElementById('station-count-badge').textContent = `${stationsData.length} 站`;
+        }
+
+        // Full redraw
+        function renderAll() {
+            renderPreview();
+            renderStationEditor();
+        }
+
+        // 6. Export Features
+        function exportToImage() {
+            const panel = document.getElementById('lcd-panel');
+            const sliderVal = document.getElementById('zoom-slider').value;
+            
+            // Set scaling to 1 temporarily to ensure the exported PNG is crisp and at native resolution (1550x460)
+            const scaleContainer = document.getElementById('preview-scale-container');
+            scaleContainer.style.transform = 'none';
+            scaleContainer.style.width = 'auto';
+            scaleContainer.style.height = 'auto';
+            
+            // Show loading toast or styling if needed
+            const btn = document.querySelector('.btn-success');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '正在渲染生成...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                html2canvas(panel, {
+                    width: 1550,
+                    height: 460,
+                    scale: 3.5, // Ultra-high resolution 3.5x
+                    useCORS: true,          
+                    backgroundColor: null, // Keeps background alpha transparent if rounded bezel
+                    logging: false          
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    const timeStamp = new Date().toISOString().slice(0,10);
+                    link.download = `Metro_LCD_Generator_${globalConfig.metroNameCn || 'Subway'}_${timeStamp}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    
+                    // Reset zoom
+                    updateZoom(sliderVal);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }).catch(err => {
+                    console.error("图片生成失败:", err);
+                    alert("图片导出失败，请重试！");
+                    
+                    // Reset zoom
+                    updateZoom(sliderVal);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                });
+            }, 100);
+        }
+
+        // JSON Import / Export
+        function exportConfigJson() {
+            const outData = {
+                generator: "Metro LCD Screen Generator V1.0",
+                config: globalConfig,
+                stations: stationsData
+            };
+            const jsonStr = JSON.stringify(outData, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Metro_LCD_Config_${globalConfig.metroNameCn || 'Subway'}.json`;
+            link.click();
+        }
+
+        function triggerImportConfig() {
+            document.getElementById('import-file-input').click();
+        }
+
+        function parseRmgJson(jsonObj, useBranchPath = false) {
+            try {
+                if (!jsonObj.stn_list || !jsonObj.line_name) {
+                    throw new Error("Missing stn_list or line_name");
+                }
+
+                const lineNameCn = jsonObj.line_name[0] || "北京地铁";
+                const lineNameEn = jsonObj.line_name[1] || "BEIJING SUBWAY";
+                
+                let lineThemeColor = "#C41230";
+                if (jsonObj.theme && jsonObj.theme[2]) {
+                    lineThemeColor = jsonObj.theme[2];
+                }
+
+                const newConfig = {
+                    metroNameCn: "北京地铁",
+                    metroNameEn: "BEIJING SUBWAY",
+                    logoChar: "D",
+                    logoBgColor: "#005A9E",
+                    logoTextColor: "#ffffff",
+                    showLogo: true,
+                    uploadedLogoUrl: "",
+                    lineThemeColor: lineThemeColor,
+                    passedTrackColor: "#cccccc",
+                    activeTrackColor: "#4CAF50",
+                    timeText: globalConfig.timeText || "2026-05-30  14:39",
+                    useLiveTime: globalConfig.useLiveTime || false,
+                    terminalCn: "",
+                    terminalEn: "",
+                    autoTerminal: true,
+                    autoNextStation: true,
+                    nextStationCn: "",
+                    nextStationEn: "",
+                    reverseDirection: false
+                };
+
+                const stns = jsonObj.stn_list;
+
+                // Scan to check if there is any node with children.length > 1
+                let hasBranchInJson = false;
+                for (const key in stns) {
+                    if (stns[key].children && stns[key].children.length > 1) {
+                        hasBranchInJson = true;
+                        break;
+                    }
+                }
+
+                const branchCheckboxContainer = document.getElementById('config-rmg-branch-container');
+                if (branchCheckboxContainer) {
+                    branchCheckboxContainer.style.display = hasBranchInJson ? 'flex' : 'none';
+                }
+
+                const stations = [];
+                let currentKey = null;
+
+                if (stns.linestart && stns.linestart.children && stns.linestart.children[0]) {
+                    currentKey = stns.linestart.children[0];
+                }
+
+                const visited = new Set();
+                while (currentKey && currentKey !== "lineend" && !visited.has(currentKey)) {
+                    visited.add(currentKey);
+                    const node = stns[currentKey];
+                    if (!node) break;
+
+                    const zhName = node.localisedName.zh || "未知站";
+                    let enName = node.localisedName.en || "Unknown";
+                    if (enName.includes('\n')) {
+                        enName = enName.split('\n')[0].trim();
+                    }
+
+                    const transfers = [];
+                    if (node.transfer && node.transfer.groups) {
+                        node.transfer.groups.forEach(group => {
+                            if (group.lines) {
+                                group.lines.forEach(lineObj => {
+                                    if (lineObj.theme && lineObj.theme[2]) {
+                                        const themeCode = lineObj.theme[1] || "";
+                                        const themeColor = lineObj.theme[2];
+
+                                        const BJ_LINE_MAP = {
+                                            'bj1': { cn: '1号线', en: 'Line 1' },
+                                            'bj2': { cn: '2号线', en: 'Line 2' },
+                                            'bj4': { cn: '4号线', en: 'Line 4' },
+                                            'bj5': { cn: '5号线', en: 'Line 5' },
+                                            'bj6': { cn: '6号线', en: 'Line 6' },
+                                            'bj7': { cn: '7号线', en: 'Line 7' },
+                                            'bj8': { cn: '8号线', en: 'Line 8' },
+                                            'bj9': { cn: '9号线', en: 'Line 9' },
+                                            'bj10': { cn: '10号线', en: 'Line 10' },
+                                            'bj11': { cn: '11号线', en: 'Line 11' },
+                                            'bj13': { cn: '13号线', en: 'Line 13' },
+                                            'bj14': { cn: '14号线', en: 'Line 14' },
+                                            'bj15': { cn: '15号线', en: 'Line 15' },
+                                            'bj16': { cn: '16号线', en: 'Line 16' },
+                                            'bj17': { cn: '17号线', en: 'Line 17' },
+                                            'bj18': { cn: '18号线', en: 'Line 18' },
+                                            'bj19': { cn: '19号线', en: 'Line 19' },
+                                            'bj20': { cn: '20号线', en: 'Line 20' },
+                                            'bj25fs': { cn: '房山线', en: 'Fangshan Line' },
+                                            'bjyz': { cn: '亦庄线', en: 'Yizhuang Line' },
+                                            'bjcp': { cn: '昌平线', en: 'Changping Line' },
+                                            'bjxj': { cn: '西郊线', en: 'Xijiao Line' },
+                                            'bjjc': { cn: '机场线', en: 'Airport Line' },
+                                            'bjs1': { cn: 'S1线', en: 'S1 Line' }
+                                        };
+
+                                        const mapped = BJ_LINE_MAP[themeCode.toLowerCase()];
+                                        if (mapped) {
+                                            if (mapped.cn.endsWith("号线")) {
+                                                transfers.push({
+                                                    style: 'standard',
+                                                    line: mapped.cn.replace("号线", ""),
+                                                    color: themeColor
+                                                });
+                                            } else {
+                                                transfers.push({
+                                                    style: 'rect',
+                                                    cn: mapped.cn,
+                                                    en: mapped.en,
+                                                    color: themeColor
+                                                });
+                                            }
+                                        } else {
+                                            let parsedName = themeCode;
+                                            const prefixes = ['bj', 'sh', 'sz', 'gz'];
+                                            prefixes.forEach(p => {
+                                                if (parsedName.toLowerCase().startsWith(p)) {
+                                                    parsedName = parsedName.substring(p.length);
+                                                }
+                                            });
+                                            parsedName = parsedName.toUpperCase();
+
+                                            if (parsedName && parsedName !== "OTHER") {
+                                                const isNumber = /^\d+$/.test(parsedName);
+                                                if (isNumber) {
+                                                    transfers.push({
+                                                        style: 'standard',
+                                                        line: parsedName,
+                                                        color: themeColor
+                                                    });
+                                                } else {
+                                                    transfers.push({
+                                                        style: 'rect',
+                                                        cn: parsedName + "线",
+                                                        en: parsedName + " Line",
+                                                        color: themeColor
+                                                    });
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+
+                    stations.push({
+                        cn: zhName,
+                        en: enName,
+                        status: "future",
+                        transfers: transfers,
+                        rmgId: currentKey
+                    });
+
+                    if (node.children && node.children.length > 0) {
+                        if (node.children.length > 1) {
+                            let throughChild = null;
+                            let branchChild = null;
+                            if (node.branch) {
+                                for (const key in node.branch) {
+                                    const val = node.branch[key];
+                                    if (Array.isArray(val) && val.length >= 2) {
+                                        const type = val[0]; // "through" or "branch"
+                                        const targetId = val[1];
+                                        if (type === 'through') {
+                                            throughChild = targetId;
+                                        } else if (type === 'branch') {
+                                            branchChild = targetId;
+                                        }
+                                    }
+                                }
+                            }
+                            if (throughChild && !branchChild) {
+                                branchChild = node.children.find(c => c !== throughChild) || null;
+                            }
+                            if (branchChild && !throughChild) {
+                                throughChild = node.children.find(c => c !== branchChild) || null;
+                            }
+                            if (!throughChild && !branchChild) {
+                                throughChild = node.children[0] || null;
+                                branchChild = node.children[1] || null;
+                            }
+
+                            if (useBranchPath) {
+                                currentKey = branchChild || throughChild;
+                            } else {
+                                currentKey = throughChild || branchChild;
+                            }
+                        } else {
+                            currentKey = node.children[0];
+                        }
+                    } else {
+                        currentKey = null;
+                    }
+                }
+
+                const rmgCurrentStnIdx = jsonObj.current_stn_idx;
+                let currentIdx = -1;
+                if (rmgCurrentStnIdx) {
+                    currentIdx = stations.findIndex(st => st.rmgId === rmgCurrentStnIdx);
+                }
+
+                stations.forEach((st, idx) => {
+                    delete st.rmgId;
+                    if (currentIdx !== -1) {
+                        if (idx < currentIdx) {
+                            st.status = "passed";
+                        } else if (idx === currentIdx) {
+                            st.status = "current";
+                        } else {
+                            st.status = "future";
+                        }
+                    } else {
+                        st.status = idx === 0 ? "current" : "future";
+                    }
+                });
+
+                if (stations.length === 0) {
+                    throw new Error("No stations parsed");
+                }
+
+                return {
+                    config: newConfig,
+                    stations: stations
+                };
+            } catch (err) {
+                console.error("RMG parsing error:", err);
+                return null;
+            }
+        }
+
+        function toggleRmgBranch(checked) {
+            if (lastImportedRmgJson) {
+                const rmgData = parseRmgJson(lastImportedRmgJson, checked);
+                if (rmgData) {
+                    globalConfig = rmgData.config;
+                    stationsData = rmgData.stations;
+                    
+                    toggleLiveTime(globalConfig.useLiveTime);
+                    updateDynamicHeaders();
+                    syncFormInputs();
+                    renderAll();
+                }
+            }
+        }
+
+        function importConfigJson(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    const isRmgMode = document.getElementById('config-rmg-compat').checked;
+
+                    if (isRmgMode) {
+                        const rmgData = parseRmgJson(parsed, false);
+                        if (rmgData) {
+                            lastImportedRmgJson = parsed;
+                            const branchCb = document.getElementById('config-rmg-branch');
+                            if (branchCb) branchCb.checked = false;
+
+                            globalConfig = rmgData.config;
+                            stationsData = rmgData.stations;
+                            
+                            toggleLiveTime(globalConfig.useLiveTime);
+                            updateDynamicHeaders();
+                            syncFormInputs();
+                            renderAll();
+                            alert("RMG 数据成功导入！");
+                        } else {
+                            alert("解析 RMG JSON 失败，请检查文件是否为合法的 RMG 线路地图配置文件！");
+                        }
+                    } else {
+                        lastImportedRmgJson = null;
+                        const branchContainer = document.getElementById('config-rmg-branch-container');
+                        if (branchContainer) branchContainer.style.display = 'none';
+                        const branchCb = document.getElementById('config-rmg-branch');
+                        if (branchCb) branchCb.checked = false;
+
+                        if (parsed.config && parsed.stations) {
+                            globalConfig = parsed.config;
+                            stationsData = parsed.stations;
+                            
+                            toggleLiveTime(globalConfig.useLiveTime);
+                            updateDynamicHeaders();
+                            syncFormInputs();
+                            renderAll();
+                            alert("数据导入成功！");
+                        } else {
+                            alert("无效的 JSON 文件格式，请使用由本工具导出的 JSON 配置文件，或勾选 'RMG 兼容导入模式' 导入 RMG 生成的文件！");
+                        }
+                    }
+                } catch (err) {
+                    console.error("JSON 解析错误:", err);
+                    alert("文件解析失败，请检查文件是否损坏！");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // Reset input to allow triggering again with same file
+        }
+    </script>
+</body>
+</html>
