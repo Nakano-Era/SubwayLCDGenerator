@@ -10,7 +10,7 @@
 ---
 ## 立即体验
  - https://lcdgen.nexus.voto/
-
+ - https://lcdgen.pages.dev/
 ---
 
 ##  功能特性
