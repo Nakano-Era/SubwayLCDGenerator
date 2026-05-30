@@ -9,7 +9,7 @@
 
 ---
 ## 立即体验
- - https://lcdgen.nexus.voto/generator
+ - https://lcdgen.nexus.voto/
 
 ---
 
