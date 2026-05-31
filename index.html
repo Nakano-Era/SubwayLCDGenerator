@@ -377,6 +377,17 @@
             border-color: rgba(255, 255, 255, 0.1);
         }
 
+        .station-edit-row.dragging {
+            opacity: 0.4;
+            border: 1px dashed var(--primary) !important;
+            background: rgba(22, 28, 45, 0.4) !important;
+        }
+
+        .station-edit-row.drag-over {
+            border: 1px solid var(--primary) !important;
+            background: rgba(59, 130, 246, 0.1) !important;
+        }
+
         .row-handle {
             display: flex;
             flex-direction: column;
@@ -1187,6 +1198,228 @@
             gap: 10px;
             margin-top: 5px;
         }
+
+        /* ==========================================
+           LOOP LAYOUT PRESET (Line 2 Loop Map)
+           ========================================== */
+        #lcd-panel.lcd-loop-mode {
+            width: 1800px;
+            height: 400px;
+            background-color: #ffffff !important;
+            border: 12px solid #333 !important;
+            display: flex !important;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6) !important;
+            position: relative !important;
+            overflow: hidden !important;
+            box-sizing: content-box !important;
+            flex-direction: row !important;
+        }
+
+        .lcd-loop-mode .left-pane {
+            width: 350px;
+            height: 100%;
+            border-right: 2px solid #e0e0e0;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+        }
+
+        .lcd-loop-mode .logo-area {
+            background-color: #e8eceb;
+            height: 85px;
+            margin: 0;
+            border-radius: 0 0 12px 12px;
+            display: flex;
+            align-items: center;
+            padding: 10px 20px 0 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .lcd-loop-mode .logo-icon {
+            width: 44px;
+            height: 44px;
+            margin-right: 12px;
+        }
+
+        .lcd-loop-mode .logo-text-zh { font-size: 22px; font-weight: bold; letter-spacing: 2px; color: #004B87; line-height: 1.1; }
+        .lcd-loop-mode .logo-text-en { font-size: 9px; font-weight: bold; letter-spacing: 1px; color: #004B87; }
+        
+        .lcd-loop-mode .line-name { color: #004B87; margin-left: 15px; display: flex; align-items: baseline; }
+        .lcd-loop-mode .line-name .num { font-size: 30px; font-weight: bold; }
+        .lcd-loop-mode .line-name .zh { font-size: 16px; margin-left: 4px; }
+        .lcd-loop-mode .line-name .en { font-size: 13px; margin-left: 5px; }
+
+        .lcd-loop-mode .next-label {
+            margin: 40px 0 0 40px;
+            color: #004B87;
+            display: flex;
+            align-items: baseline;
+            position: relative;
+            z-index: 2;
+        }
+        .lcd-loop-mode .next-label .zh { font-size: 24px; font-weight: bold; margin-right: 10px; }
+        .lcd-loop-mode .next-label .en { font-size: 16px; }
+
+        .lcd-loop-mode .next-station {
+            margin: 30px 0 0 0;
+            color: #004B87;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+        .lcd-loop-mode .next-station .zh { font-size: 68px; font-weight: bold; letter-spacing: 8px; line-height: 1.1; margin-left: 8px; }
+        .lcd-loop-mode .next-station .en { font-size: 28px; font-weight: bold; letter-spacing: 1px; }
+
+        .lcd-loop-mode .silhouette-svg {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 180px;
+            z-index: 1;
+        }
+
+        .lcd-loop-mode .right-pane {
+            width: 1450px;
+            height: 100%;
+            position: relative;
+            background-color: #fff;
+        }
+
+        .lcd-loop-mode .direction-text {
+            position: absolute;
+            color: #E3002B;
+            text-align: center;
+            width: 70px;
+            line-height: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .lcd-loop-mode .direction-text .zh-small { font-size: 11px; font-weight: bold; white-space: nowrap; }
+        .lcd-loop-mode .direction-text .en-small { font-size: 12px; transform: scale(0.65); transform-origin: center top; margin-top: 2px; white-space: nowrap; }
+        .lcd-loop-mode .direction-text .zh-large { font-size: 16px; font-weight: bold; margin-top: 6px; }
+        .lcd-loop-mode .direction-text .en-large { font-size: 12px; transform: scale(0.75); transform-origin: center top; margin-top: 2px; white-space: nowrap; }
+        
+        .lcd-loop-mode .direction-left-text { left: 15px; top: 35px; }
+        .lcd-loop-mode .direction-right-text { right: 5px; top: 290px; }
+        
+        .lcd-loop-mode .arrow-left { position: absolute; left: 0px; top: 150px; width: 40px; height: 100px; fill: none; overflow: visible; }
+        .lcd-loop-mode .arrow-right { position: absolute; right: 0px; top: 150px; width: 40px; height: 100px; fill: none; overflow: visible; }
+
+        .lcd-loop-mode .station-name {
+            position: absolute;
+            text-align: center;
+            width: 120px;
+            margin-left: -60px;
+            line-height: 1.15;
+        }
+        .lcd-loop-mode .station-name.top { top: 45px; }
+        .lcd-loop-mode .station-name.bottom { top: 325px; }
+        .lcd-loop-mode .station-name .zh { font-size: 19px; font-weight: bold; color: #111; margin-bottom: 3px; }
+        .lcd-loop-mode .station-name .en { font-size: 11px; color: #444; font-family: Helvetica, Arial, sans-serif; }
+        
+        .lcd-loop-mode .station-name.passed .zh { color: #777; }
+        .lcd-loop-mode .station-name.passed .en { color: #777; }
+        
+        .lcd-loop-mode .station-name.compact .zh { font-size: 15px; margin-bottom: 1px; }
+        .lcd-loop-mode .station-name.compact .en { font-size: 9px; line-height: 1.1; }
+        .lcd-loop-mode .station-name.compact .en span { font-size: 8px; transform: scale(0.9); display: inline-block; }
+
+        .lcd-loop-mode .station-name.closed .zh {
+            color: #ef4444;
+            text-decoration: line-through;
+        }
+        .lcd-loop-mode .station-name.closed .en {
+            color: #ef4444;
+            font-style: italic;
+        }
+
+        .lcd-loop-mode .fuxingmen-highlight {
+            position: absolute;
+            width: 110px;
+            margin-left: -55px;
+            border-radius: 6px;
+            padding: 8px 0;
+            text-align: center;
+            z-index: 8;
+        }
+        .lcd-loop-mode .fuxingmen-highlight .zh { font-size: 22px; font-weight: bold; color: #fff; margin-bottom: 2px; }
+        .lcd-loop-mode .fuxingmen-highlight .en { font-size: 12px; color: #fff; font-family: Helvetica, Arial, sans-serif; }
+
+        .lcd-loop-mode .transfer-group { position: absolute; display: flex; flex-direction: column; align-items: center; transform: translateX(-50%); z-index: 10;}
+        .lcd-loop-mode .transfer-group-up { position: absolute; display: flex; flex-direction: column; align-items: center; transform: translateX(-50%); z-index: 10;}
+        
+        .lcd-loop-mode .t-arrow-down { width: 24px; height: 48px; margin-bottom: 3px; display: block; }
+        .lcd-loop-mode .t-arrow-up { width: 24px; height: 48px; margin-top: 3px; display: block; }
+        
+        .lcd-loop-mode .t-box-container {
+            display: flex;
+            transform: scale(0.65);
+            transform-origin: top center;
+        }
+        .lcd-loop-mode .transfer-group-up .t-box-container {
+            transform-origin: bottom center;
+        }
+
+        .lcd-loop-mode .t-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            color: white;
+            padding: 0 8px;
+            height: 37px;
+            box-shadow: 1.5px 1.5px 4px rgba(0,0,0,0.2);
+        }
+        .lcd-loop-mode .t-num { font-size: 26px; font-weight: bold; margin-right: 5px; line-height: 1; font-family: Helvetica, Arial, sans-serif;}
+        .lcd-loop-mode .t-txt {
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            white-space: nowrap;
+            line-height: 1.1;
+        }
+
+        /* Dark Mode overrides for Loop Layout */
+        .lcd-dark-theme.lcd-loop-mode {
+            background-color: #12161c !important;
+            border-color: #0f172a !important;
+        }
+        .lcd-dark-theme.lcd-loop-mode .left-pane {
+            background-color: #161c24;
+            border-right-color: #2e3846;
+        }
+        .lcd-dark-theme.lcd-loop-mode .logo-area {
+            background-color: #212b36;
+        }
+        .lcd-dark-theme.lcd-loop-mode .logo-text-zh,
+        .lcd-dark-theme.lcd-loop-mode .logo-text-en,
+        .lcd-dark-theme.lcd-loop-mode .line-name {
+            color: var(--logo-bg-color);
+        }
+        .lcd-dark-theme.lcd-loop-mode .next-label {
+            color: #8892b0;
+        }
+        .lcd-dark-theme.lcd-loop-mode .next-station {
+            color: #e2e8f0;
+        }
+        .lcd-dark-theme.lcd-loop-mode .right-pane {
+            background-color: #12161c;
+        }
+        .lcd-dark-theme.lcd-loop-mode .station-name .zh {
+            color: #e2e8f0;
+        }
+        .lcd-dark-theme.lcd-loop-mode .station-name .en {
+            color: #8892b0;
+        }
+        .lcd-dark-theme.lcd-loop-mode .station-name.passed .zh,
+        .lcd-dark-theme.lcd-loop-mode .station-name.passed .en {
+            color: #4a5568;
+        }
     </style>
 </head>
 <body>
@@ -1213,6 +1446,15 @@
         <!-- Sidebar Controls -->
         <div class="sidebar">
             
+            <!-- Presets Card -->
+            <div class="glass-panel">
+                <h2>预设模板 <span class="brand-subtitle">Presets</span></h2>
+                <div class="preset-buttons">
+                    <button class="preset-btn" onclick="loadPreset('line1')">北京地铁1号线</button>
+                    <button class="preset-btn" onclick="loadPreset('line2')">北京地铁2号线</button>
+                </div>
+            </div>
+
             <!-- Global Config Card -->
             <div class="glass-panel">
                 <h2>全局配置 <span class="brand-subtitle">Global Config</span></h2>
@@ -1225,6 +1467,27 @@
                     <div class="form-group">
                         <label for="config-metro-en">Metro Name (EN)</label>
                         <input type="text" id="config-metro-en" oninput="updateGlobalSetting('metroNameEn', this.value)" placeholder="例: BEIJING SUBWAY">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="config-line-name">线路名称 (中)</label>
+                        <input type="text" id="config-line-name" oninput="updateGlobalSetting('lineName', this.value)" placeholder="例: 2">
+                    </div>
+                    <div class="form-group">
+                        <label for="config-line-name-en">线路名称 (EN)</label>
+                        <input type="text" id="config-line-name-en" oninput="updateGlobalSetting('lineNameEn', this.value)" placeholder="例: Line 2">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="config-panel-width">显示屏宽度 (px)</label>
+                        <input type="number" id="config-panel-width" oninput="updateGlobalSetting('panelWidth', parseInt(this.value) || 0)" placeholder="例: 1800">
+                    </div>
+                    <div class="form-group">
+                        <!-- Spacer -->
                     </div>
                 </div>
 
@@ -1380,55 +1643,131 @@
                 <div class="preview-scale-container" id="preview-scale-container">
                     
                     <!-- THE LCD PANEL PREVIEW CONTAINER -->
-                    <div class="lcd-panel" id="lcd-panel">
-                        <div class="header">
-                            <div class="logo-area" id="preview-logo-area">
-                                <div class="logo-icon" id="preview-logo-icon">D</div>
-                                <div>
-                                    <span id="preview-metro-cn">北京地铁</span><br>
-                                    <span id="preview-metro-en" style="font-size:10px; font-weight:normal; margin-top:-5px; font-family:Arial, sans-serif; display:block;">BEIJING SUBWAY</span>
+                     <div class="lcd-panel" id="lcd-panel">
+                        <!-- Standard Linear Layout -->
+                        <div id="linear-layout-container" style="width: 100%; height: 100%; display: flex; flex-direction: column;">
+                            <div class="header">
+                                <div class="logo-area" id="preview-logo-area">
+                                    <div class="logo-icon" id="preview-logo-icon">D</div>
+                                    <div>
+                                        <span id="preview-metro-cn">北京地铁</span><br>
+                                        <span id="preview-metro-en" style="font-size:10px; font-weight:normal; margin-top:-5px; font-family:Arial, sans-serif; display:block;">BEIJING SUBWAY</span>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class="time-area" id="preview-time-area">
-                                2026-05-30 &nbsp;&nbsp; 14:39
+                                
+                                <div class="time-area" id="preview-time-area">
+                                    2026-05-30 &nbsp;&nbsp; 14:39
+                                </div>
+
+                                <div class="next-station-area" id="preview-next-area">
+                                    <svg class="next-station-bg-svg" id="preview-next-bg-svg" viewBox="0 0 500 52" preserveAspectRatio="none" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">
+                                        <polygon id="preview-next-bg-polygon" points="20,0 480,0 500,52 0,52" fill="var(--line-color)" />
+                                    </svg>
+                                    <div class="next-station-text" style="position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                                        <div class="cn" id="preview-next-cn">下一站：&nbsp;--</div>
+                                        <div class="en" id="preview-next-en">Next Station:&nbsp; --</div>
+                                    </div>
+                                </div>
+
+                                <div class="door-area">
+                                    <div class="door-icon"></div>
+                                    <div class="door-icon"></div>
+                                    <div class="door-text">
+                                        <span class="cn" id="preview-door-cn">本侧开门</span>
+                                        <span class="en" id="preview-door-en">Doors open on this side</span>
+                                    </div>
+                                </div>
+
+                                <div class="terminal-area">
+                                    <div class="terminal-text">
+                                        <span class="cn">终点站:</span>
+                                        <span class="en">Terminal:</span>
+                                    </div>
+                                    <div class="terminal-name">
+                                        <span class="cn" id="preview-terminal-cn">--</span>
+                                        <span class="en" id="preview-terminal-en">--</span>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="next-station-area" id="preview-next-area">
-                                <svg class="next-station-bg-svg" id="preview-next-bg-svg" viewBox="0 0 500 52" preserveAspectRatio="none" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">
-                                    <polygon id="preview-next-bg-polygon" points="20,0 480,0 500,52 0,52" fill="var(--line-color)" />
-                                </svg>
-                                <div class="next-station-text" style="position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                                    <div class="cn" id="preview-next-cn">下一站：&nbsp;--</div>
-                                    <div class="en" id="preview-next-en">Next Station:&nbsp; --</div>
-                                </div>
-                            </div>
-
-                            <div class="door-area">
-                                <div class="door-icon"></div>
-                                <div class="door-icon"></div>
-                                <div class="door-text">
-                                    <span class="cn" id="preview-door-cn">本侧开门</span>
-                                    <span class="en" id="preview-door-en">Doors open on this side</span>
-                                </div>
-                            </div>
-
-                            <div class="terminal-area">
-                                <div class="terminal-text">
-                                    <span class="cn">终点站:</span>
-                                    <span class="en">Terminal:</span>
-                                </div>
-                                <div class="terminal-name">
-                                    <span class="cn" id="preview-terminal-cn">--</span>
-                                    <span class="en" id="preview-terminal-en">--</span>
+                            <div class="route-map">
+                                <div class="track-line-bg"></div>
+                                <div class="stations-container" id="lcd-stations-container">
+                                    <!-- Generated Dynamically -->
                                 </div>
                             </div>
                         </div>
 
-                        <div class="route-map">
-                            <div class="track-line-bg"></div>
-                            <div class="stations-container" id="lcd-stations-container">
-                                <!-- Generated Dynamically -->
+                        <!-- Loop Layout Container ( Beijing Line 2 Style ) -->
+                        <div id="loop-layout-container" style="width: 100%; height: 100%; display: none; position: relative; flex-direction: row;">
+                            <!-- === 左侧面板 === -->
+                            <div class="left-pane">
+                              <div class="logo-area" id="loop-logo-area">
+                                <div class="logo-icon" id="loop-logo-icon"></div>
+                                <div>
+                                  <div class="logo-text-zh" id="loop-logo-text-zh">北京地铁</div>
+                                  <div class="logo-text-en" id="loop-logo-text-en">BEIJING SUBWAY</div>
+                                </div>
+                                <div class="line-name" id="loop-line-name-container">
+                                  <span class="num" id="loop-line-num">2</span>
+                                  <span class="zh" id="loop-line-zh">号线</span>
+                                  <span class="en" id="loop-line-en">Line 2</span>
+                                </div>
+                              </div>
+
+                              <div class="next-label">
+                                <span class="zh">下一站</span>
+                                <span class="en">Next Station</span>
+                              </div>
+
+                              <div class="next-station">
+                                <div class="zh" id="loop-next-station-zh">复兴门</div>
+                                <div class="en" id="loop-next-station-en">Fuxingmen</div>
+                              </div>
+
+                              <!-- 背景城墙剪影 -->
+                              <svg class="silhouette-svg" viewBox="0 0 350 180" preserveAspectRatio="none">
+                                <defs>
+                                  <linearGradient id="wall-grad-loop" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#e8eceb" />
+                                    <stop offset="100%" stop-color="#b8c2c1" />
+                                  </linearGradient>
+                                </defs>
+                                <path d="M 0 180 L 0 90 L 45 90 L 45 40 L 115 40 L 115 90 L 185 90 L 185 40 L 255 40 L 255 90 L 325 90 L 325 40 L 350 40 L 350 180 Z" fill="url(#wall-grad-loop)" />
+                              </svg>
+                            </div>
+
+                            <!-- === 右侧面板 === -->
+                            <div class="right-pane">
+                              <!-- 左侧方向指示 -->
+                              <div class="direction-text direction-left-text">
+                                <div class="zh-small">列车运行方向</div>
+                                <div class="en-small">Direction of<br>trains</div>
+                                <div class="zh-large" id="loop-dir-left-zh">外环</div>
+                                <div class="en-large" id="loop-dir-left-en">Outer Circle</div>
+                              </div>
+                              <svg class="arrow-left" id="loop-arrow-left" viewBox="0 0 40 100">
+                                <path d="M 25 0 Q 5 50 25 100" stroke="#E3002B" stroke-width="5" stroke-linecap="round"/>
+                                <polygon points="25,100 12,88 28,83" fill="#E3002B" />
+                              </svg>
+
+                              <!-- 右侧方向指示 -->
+                              <div class="direction-text direction-right-text">
+                                <div class="zh-small">列车运行方向</div>
+                                <div class="en-small">Direction of<br>trains</div>
+                                <div class="zh-large" id="loop-dir-right-zh">外环</div>
+                                <div class="en-large" id="loop-dir-right-en">Outer Circle</div>
+                              </div>
+                              <svg class="arrow-right" id="loop-arrow-right" viewBox="0 0 40 100">
+                                <path d="M 15 100 Q 35 50 15 0" stroke="#E3002B" stroke-width="5" stroke-linecap="round"/>
+                                <polygon points="15,0 28,12 12,17" fill="#E3002B" />
+                              </svg>
+
+                              <!-- 核心线路 SVG -->
+                              <svg width="1450" height="400" id="loop-svg-track" style="position: absolute; top: 0; left: 0;"></svg>
+
+                              <!-- Stations names & highlights & transfers -->
+                              <div id="loop-stations-layer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
                             </div>
                         </div>
                     </div>
@@ -1524,6 +1863,9 @@
         let globalConfig = {
             metroNameCn: "北京地铁",
             metroNameEn: "BEIJING SUBWAY",
+            lineName: "2",
+            lineNameEn: "Line 2",
+            panelWidth: 1550,
             logoChar: "D",
             logoBgColor: "#005A9E",
             logoTextColor: "#ffffff",
@@ -1542,13 +1884,15 @@
             autoNextStation: true,
             nextStationCn: "",
             nextStationEn: "",
-            reverseDirection: false
+            reverseDirection: false,
+            layoutMode: "linear"
         };
 
         let stationsData = [];
         let currentlyEditingStationIndex = null;
         let currentlyEditingTransferIndex = null;
         let lastImportedRmgJson = null;
+        let draggedIndex = null;
         let clockTimer = null;
 
         // Templates Data
@@ -1557,6 +1901,9 @@
                 config: {
                     metroNameCn: "北京地铁",
                     metroNameEn: "BEIJING SUBWAY",
+                    lineName: "1",
+                    lineNameEn: "Line 1",
+                    panelWidth: 1550,
                     logoChar: "D",
                     logoBgColor: "#005A9E",
                     logoTextColor: "#ffffff",
@@ -1575,7 +1922,8 @@
                     autoNextStation: true,
                     nextStationCn: "",
                     nextStationEn: "",
-                    reverseDirection: false
+                    reverseDirection: false,
+                    layoutMode: "linear"
                 },
                 stations: [
                     { cn: "苹果园", en: "Pingguoyuan", status: "passed", transfers: [] },
@@ -1616,10 +1964,62 @@
                     { cn: "环球度假区", en: "Universal Resort", status: "future", transfers: [{ line: "7", color: "#FFC000" }] }
                 ]
             },
+            line2: {
+                config: {
+                    metroNameCn: "北京地铁",
+                    metroNameEn: "BEIJING SUBWAY",
+                    lineName: "2",
+                    lineNameEn: "Line 2",
+                    panelWidth: 1800,
+                    logoChar: "D",
+                    logoBgColor: "#005A9E",
+                    logoTextColor: "#ffffff",
+                    showLogo: true,
+                    uploadedLogoUrl: "",
+                    lineThemeColor: "#004B87",
+                    passedTrackColor: "#cccccc",
+                    activeTrackColor: "#004B87",
+                    timeText: "2026-05-30  14:39",
+                    useLiveTime: false,
+                    doorSideCn: "本侧开门",
+                    doorSideEn: "Doors open on this side",
+                    terminalCn: "",
+                    terminalEn: "",
+                    autoTerminal: true,
+                    autoNextStation: true,
+                    nextStationCn: "",
+                    nextStationEn: "",
+                    reverseDirection: false,
+                    layoutMode: "loop"
+                },
+                stations: [
+                    { cn: "西直门", en: "Xizhimen", status: "passed", transfers: [{ line: "4", color: "#008C95" }, { line: "13", color: "#E4CE00" }] },
+                    { cn: "积水潭", en: "Jishuitan", status: "passed", transfers: [{ line: "19", color: "#DDA4B4" }] },
+                    { cn: "鼓楼大街", en: "Gulou Dajie", status: "passed", transfers: [{ line: "8", color: "#009B77" }] },
+                    { cn: "安定门", en: "Andingmen", status: "passed", transfers: [] },
+                    { cn: "雍和宫", en: "Yonghegong (Lama Temple)", status: "passed", transfers: [{ line: "5", color: "#AA0061" }] },
+                    { cn: "东直门", en: "Dongzhimen", status: "passed", transfers: [{ line: "13", color: "#E4CE00" }, { style: "rect", cn: "首都机场线", en: "Capital Airport Express", color: "#A290B2" }] },
+                    { cn: "东四十条", en: "Dongsi Shitiao", status: "passed", transfers: [] },
+                    { cn: "朝阳门", en: "Chaoyangmen", status: "passed", transfers: [{ line: "6", color: "#D29700" }] },
+                    { cn: "建国门", en: "Jianguomen", status: "passed", transfers: [{ line: "1", color: "#E3002B" }] },
+                    { cn: "北京站", en: "Beijing Railway Station", status: "current", transfers: [] },
+                    { cn: "崇文门", en: "Chongwenmen", status: "future", transfers: [{ line: "5", color: "#AA0061" }] },
+                    { cn: "前门", en: "Qianmen", status: "future", transfers: [{ line: "8", color: "#009B77" }] },
+                    { cn: "和平门", en: "Hepingmen", status: "future", transfers: [] },
+                    { cn: "宣武门", en: "Xuanwumen", status: "future", transfers: [{ line: "4", color: "#008C95" }] },
+                    { cn: "长椿街", en: "Changchun Jie", status: "future", transfers: [] },
+                    { cn: "复兴门", en: "Fuxingmen", status: "future", transfers: [{ line: "1", color: "#E3002B" }] },
+                    { cn: "阜成门", en: "Fuchengmen", status: "future", transfers: [] },
+                    { cn: "车公庄", en: "Chegongzhuang", status: "future", transfers: [{ line: "6", color: "#D29700" }] }
+                ]
+            },
             line10: {
                 config: {
                     metroNameCn: "北京地铁",
                     metroNameEn: "BEIJING SUBWAY",
+                    lineName: "10",
+                    lineNameEn: "Line 10",
+                    panelWidth: 1550,
                     logoChar: "D",
                     logoBgColor: "#005A9E",
                     logoTextColor: "#ffffff",
@@ -1638,7 +2038,8 @@
                     autoNextStation: true,
                     nextStationCn: "",
                     nextStationEn: "",
-                    reverseDirection: false
+                    reverseDirection: false,
+                    layoutMode: "linear"
                 },
                 stations: [
                     { cn: "巴沟", en: "Bagou", status: "passed", transfers: [{ line: "西郊线", color: "#D86018" }] },
@@ -1657,6 +2058,9 @@
                 config: {
                     metroNameCn: "都市地铁",
                     metroNameEn: "METRO TRANSIT",
+                    lineName: "2",
+                    lineNameEn: "Line 2",
+                    panelWidth: 1550,
                     logoChar: "M",
                     logoBgColor: "#1e3a8a",
                     logoTextColor: "#ffffff",
@@ -1675,7 +2079,8 @@
                     autoNextStation: true,
                     nextStationCn: "",
                     nextStationEn: "",
-                    reverseDirection: false
+                    reverseDirection: false,
+                    layoutMode: "linear"
                 },
                 stations: [
                     { cn: "始发站", en: "Start Station", status: "current", transfers: [] },
@@ -1702,8 +2107,10 @@
             document.getElementById('zoom-label').textContent = `${Math.round(zoomVal * 100)}%`;
             
             // Adjust dimensions to fit the scaled element nicely in the scroll parent
-            const panelWidth = 1550;
-            const panelHeight = 460;
+            const isLoop = globalConfig.layoutMode === 'loop';
+            const panelWidth = globalConfig.panelWidth || (isLoop ? 1800 : 1550);
+            const panelHeight = isLoop ? 400 : 460;
+            
             scaleContainer.style.width = `${panelWidth}px`;
             scaleContainer.style.height = `${panelHeight}px`;
             
@@ -1858,8 +2265,26 @@
             // Calculate Terminal Station (depends on direction if auto)
             if (globalConfig.autoTerminal) {
                 if (stationsData.length > 0) {
-                    // Symmetrical check: Standard terminal is the last station, Reverse terminal is the first station
-                    const targetStation = globalConfig.reverseDirection ? stationsData[0] : stationsData[stationsData.length - 1];
+                    let targetStation = null;
+                    if (globalConfig.reverseDirection) {
+                        // Downlink: find the first station from the left that is NOT closed
+                        for (let i = 0; i < stationsData.length; i++) {
+                            if (stationsData[i].status !== 'closed') {
+                                targetStation = stationsData[i];
+                                break;
+                            }
+                        }
+                        if (!targetStation) targetStation = stationsData[0];
+                    } else {
+                        // Uplink: find the first station from the right that is NOT closed
+                        for (let i = stationsData.length - 1; i >= 0; i--) {
+                            if (stationsData[i].status !== 'closed') {
+                                targetStation = stationsData[i];
+                                break;
+                            }
+                        }
+                        if (!targetStation) targetStation = stationsData[stationsData.length - 1];
+                    }
                     globalConfig.terminalCn = targetStation.cn || "--";
                     globalConfig.terminalEn = targetStation.en || "--";
                 } else {
@@ -1912,6 +2337,9 @@
         function syncFormInputs() {
             document.getElementById('config-metro-cn').value = globalConfig.metroNameCn;
             document.getElementById('config-metro-en').value = globalConfig.metroNameEn;
+            document.getElementById('config-line-name').value = globalConfig.lineName || '';
+            document.getElementById('config-line-name-en').value = globalConfig.lineNameEn || '';
+            document.getElementById('config-panel-width').value = globalConfig.panelWidth || '';
             document.getElementById('config-logo-char').value = globalConfig.logoChar;
             
             document.getElementById('config-logo-bg').value = globalConfig.logoBgColor;
@@ -2217,6 +2645,349 @@
             panel.style.setProperty('--passed-color', globalConfig.passedTrackColor);
             panel.style.setProperty('--active-color', globalConfig.activeTrackColor);
 
+            const isLoopMode = globalConfig.layoutMode === 'loop';
+            const defaultWidth = isLoopMode ? 1800 : 1550;
+            const currentWidth = globalConfig.panelWidth || defaultWidth;
+            panel.style.width = currentWidth + 'px';
+            
+            if (isLoopMode) {
+                panel.classList.add('lcd-loop-mode');
+                panel.style.height = '400px';
+                const rightPane = document.querySelector('.lcd-loop-mode .right-pane');
+                if (rightPane) {
+                    rightPane.style.width = (currentWidth - 350) + 'px';
+                }
+            } else {
+                panel.classList.remove('lcd-loop-mode');
+                panel.style.height = '460px';
+            }
+            
+            // Toggle containers
+            const linearContainer = document.getElementById('linear-layout-container');
+            const loopContainer = document.getElementById('loop-layout-container');
+            if (linearContainer && loopContainer) {
+                linearContainer.style.display = isLoopMode ? 'none' : 'flex';
+                loopContainer.style.display = isLoopMode ? 'flex' : 'none';
+            }
+
+            if (isLoopMode) {
+                // Logo area visibility
+                const loopLogoArea = document.getElementById('loop-logo-area');
+                if (loopLogoArea) {
+                    loopLogoArea.style.display = (globalConfig.showLogo !== false) ? 'flex' : 'none';
+                }
+                
+                // Logo icon
+                const loopLogoIcon = document.getElementById('loop-logo-icon');
+                if (loopLogoIcon) {
+                    if (globalConfig.uploadedLogoUrl) {
+                        loopLogoIcon.innerHTML = `<img src="${globalConfig.uploadedLogoUrl}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                    } else {
+                        if (globalConfig.logoChar === 'D' || !globalConfig.logoChar) {
+                            loopLogoIcon.innerHTML = `
+                                <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+                                    <circle cx="50" cy="50" r="45" fill="${globalConfig.logoBgColor}" />
+                                    <path d="M 50 20 A 30 30 0 1 0 80 50 L 62 50 A 12 12 0 1 1 50 38 L 50 20 Z" fill="white" />
+                                    <rect x="43" y="43" width="14" height="14" fill="${globalConfig.logoBgColor}" />
+                                </svg>
+                            `;
+                        } else {
+                            loopLogoIcon.style.borderRadius = '50%';
+                            loopLogoIcon.style.border = `3px solid ${globalConfig.logoBgColor}`;
+                            loopLogoIcon.style.backgroundColor = globalConfig.logoBgColor;
+                            loopLogoIcon.style.color = globalConfig.logoTextColor;
+                            loopLogoIcon.style.display = 'flex';
+                            loopLogoIcon.style.justifyContent = 'center';
+                            loopLogoIcon.style.alignItems = 'center';
+                            loopLogoIcon.style.fontSize = '24px';
+                            loopLogoIcon.style.fontWeight = '900';
+                            loopLogoIcon.style.fontFamily = 'Arial, sans-serif';
+                            loopLogoIcon.textContent = globalConfig.logoChar;
+                        }
+                    }
+                }
+                
+                // Logo branding names
+                document.getElementById('loop-logo-text-zh').textContent = globalConfig.metroNameCn;
+                document.getElementById('loop-logo-text-en').textContent = globalConfig.metroNameEn;
+
+                // Sync line name num, zh, en from theme settings
+                const lineNameContainer = document.getElementById('loop-line-name-container');
+                if (lineNameContainer) {
+                    lineNameContainer.style.color = globalConfig.lineThemeColor;
+                }
+                const loopLineNum = document.getElementById('loop-line-num');
+                const loopLineZh = document.getElementById('loop-line-zh');
+                const loopLineEn = document.getElementById('loop-line-en');
+                if (loopLineNum && loopLineZh && loopLineEn) {
+                    const lName = globalConfig.lineName || '2';
+                    loopLineNum.textContent = lName;
+                    loopLineZh.textContent = lName.includes('线') ? '' : '号线';
+                    loopLineEn.textContent = globalConfig.lineNameEn || ('Line ' + lName);
+                }
+
+                // Next station
+                document.getElementById('loop-next-station-zh').textContent = globalConfig.nextStationCn || '--';
+                document.getElementById('loop-next-station-en').textContent = globalConfig.nextStationEn || '--';
+
+                // Direction and Arrows
+                const reverseDir = globalConfig.reverseDirection;
+                document.getElementById('loop-dir-left-zh').textContent = reverseDir ? '内环' : '外环';
+                document.getElementById('loop-dir-left-en').textContent = reverseDir ? 'Inner Circle' : 'Outer Circle';
+                document.getElementById('loop-dir-right-zh').textContent = reverseDir ? '内环' : '外环';
+                document.getElementById('loop-dir-right-en').textContent = reverseDir ? 'Inner Circle' : 'Outer Circle';
+                
+                // Flip arrows for clockwise/uplink
+                const arrowLeft = document.getElementById('loop-arrow-left');
+                const arrowRight = document.getElementById('loop-arrow-right');
+                if (arrowLeft && arrowRight) {
+                    if (reverseDir) {
+                        arrowLeft.style.transform = 'none';
+                        arrowRight.style.transform = 'none';
+                    } else {
+                        arrowLeft.style.transform = 'scaleY(-1)';
+                        arrowRight.style.transform = 'scaleY(-1)';
+                    }
+                }
+
+                // Render stations & highlights & transfers
+                const stationsLayer = document.getElementById('loop-stations-layer');
+                const svgTrack = document.getElementById('loop-svg-track');
+                
+                if (stationsLayer && svgTrack) {
+                    stationsLayer.innerHTML = '';
+                    svgTrack.innerHTML = '';
+                    
+                    const N = stationsData.length;
+                    
+                    // Set SVG track width dynamically to match the current width minus left-pane (350)
+                    const W_right = currentWidth - 350;
+                    svgTrack.setAttribute('width', W_right);
+                    
+                    // Determine offset: if 18 stations starting with 西直门, offset is 2.
+                    // Otherwise, offset is 0.
+                    let offset = 0;
+                    if (N === 18 && stationsData[0] && stationsData[0].cn === "西直门") {
+                        offset = 2;
+                    }
+                    
+                    // Build LOOP_SLOTS dynamically
+                    const nTop = Math.ceil(N / 2);
+                    const nBottom = N - nTop;
+                    const LOOP_SLOTS = [];
+                    
+                    // Calculate dynamic margins and zone width
+                    const x_right = W_right - 180;
+                    const x_turn = W_right - 120;
+                    const w_zone = W_right - 360;
+                    
+                    // Top line slots
+                    const wTop = nTop > 1 ? w_zone / (nTop - 1) : w_zone;
+                    for (let i = 0; i < nTop; i++) {
+                        const xVal = nTop > 1 ? 180 + i * wTop : 180 + w_zone / 2;
+                        LOOP_SLOTS.push({
+                            x: Math.round(xVal),
+                            isTop: true
+                        });
+                    }
+                    
+                    // Bottom line slots (right to left)
+                    const wBottom = nBottom > 1 ? w_zone / (nBottom - 1) : w_zone;
+                    for (let i = 0; i < nBottom; i++) {
+                        const xVal = nBottom > 1 ? x_right - i * wBottom : 180 + w_zone / 2;
+                        LOOP_SLOTS.push({
+                            x: Math.round(xVal),
+                            isTop: false
+                        });
+                    }
+                    
+                    // Generate segment colors
+                    let segmentColors = [];
+                    for (let i = 0; i < N; i++) {
+                        let idx_A = (i - offset + N) % N;
+                        let idx_B = (i + 1 - offset + N) % N;
+                        
+                        let st_A = stationsData[idx_A];
+                        let st_B = stationsData[idx_B];
+                        
+                        let color = globalConfig.lineThemeColor; // Active
+                        
+                        if (st_A && st_B) {
+                            if (!reverseDir) {
+                                if (st_B.status === 'passed' || st_B.status === 'current') {
+                                    color = globalConfig.passedTrackColor;
+                                }
+                            } else {
+                                if (st_A.status === 'passed' || st_A.status === 'current') {
+                                    color = globalConfig.passedTrackColor;
+                                }
+                            }
+                        }
+                        segmentColors.push(color);
+                    }
+                    
+                    // Generate paths array dynamically
+                    const paths = [];
+                    for (let i = 0; i < N; i++) {
+                        const slotA = LOOP_SLOTS[i];
+                        const slotB = LOOP_SLOTS[(i + 1) % N];
+                        
+                        let dStr = "";
+                        if (slotA.isTop && slotB.isTop) {
+                            // Top-to-Top
+                            dStr = `M ${slotA.x} 92 L ${slotA.x + 15} 92 L ${slotA.x + 15} 120 L ${slotB.x - 15} 120 L ${slotB.x - 15} 92 L ${slotB.x} 92`;
+                        } else if (!slotA.isTop && !slotB.isTop) {
+                            // Bottom-to-Bottom
+                            dStr = `M ${slotA.x} 308 L ${slotA.x - 15} 308 L ${slotA.x - 15} 280 L ${slotB.x + 15} 280 L ${slotB.x + 15} 308 L ${slotB.x} 308`;
+                        } else if (slotA.isTop && !slotB.isTop) {
+                            // Top-to-Bottom (right turn)
+                            dStr = `M ${slotA.x} 92 L ${slotA.x + 15} 92 L ${slotA.x + 15} 120 L ${x_turn} 120 A 80 80 0 0 1 ${x_turn} 280 L ${slotB.x + 15} 280 L ${slotB.x + 15} 308 L ${slotB.x} 308`;
+                        } else {
+                            // Bottom-to-Top (left turn)
+                            dStr = `M ${slotA.x} 308 L ${slotA.x - 15} 308 L ${slotA.x - 15} 280 L 120 280 A 80 80 0 0 1 120 120 L ${slotB.x - 15} 120 L ${slotB.x - 15} 92 L ${slotB.x} 92`;
+                        }
+                        paths.push(dStr);
+                    }
+                    
+                    paths.forEach((dStr, sIdx) => {
+                        const pathEl = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                        pathEl.setAttribute("d", dStr);
+                        pathEl.setAttribute("stroke", segmentColors[sIdx]);
+                        pathEl.setAttribute("stroke-width", "14");
+                        pathEl.setAttribute("stroke-linejoin", "miter");
+                        pathEl.setAttribute("fill", "none");
+                        svgTrack.appendChild(pathEl);
+                    });
+
+                    stationsData.forEach((station, index) => {
+                        let slotIdx = (index + offset) % N;
+                        let slot = LOOP_SLOTS[slotIdx];
+                        if (!slot) return;
+                        
+                        let isCurrent = station.status === 'current';
+                        let isPassed = station.status === 'passed';
+                        let isClosed = station.status === 'closed';
+                        
+                        const textDiv = document.createElement('div');
+                        
+                        let rawEn = station.en;
+                        let enHtml = rawEn;
+                        if (rawEn.includes('(') && rawEn.includes(')')) {
+                            const parts = rawEn.split('(');
+                            const mainEn = parts[0].trim();
+                            const subEn = parts[1].replace(')', '').trim();
+                            const color = isCurrent ? '#fff' : '#777';
+                            const opacityStyle = isCurrent ? 'opacity: 0.8;' : '';
+                            enHtml = `${mainEn}<br><span style="color:${color}; ${opacityStyle}">(${subEn})</span>`;
+                        }
+
+                        if (isCurrent) {
+                            textDiv.className = `fuxingmen-highlight`;
+                            textDiv.style.left = `${slot.x}px`;
+                            textDiv.style.top = slot.isTop ? `32px` : `312px`;
+                            textDiv.style.backgroundColor = globalConfig.lineThemeColor;
+                            
+                            textDiv.innerHTML = `
+                                <div class="zh">${station.cn}</div>
+                                <div class="en">${enHtml}</div>
+                            `;
+                        } else {
+                            const isCompact = station.cn.length >= 4 || station.en.length >= 12;
+                            textDiv.className = `station-name ${slot.isTop ? 'top' : 'bottom'} ${isPassed ? 'passed' : ''} ${isClosed ? 'closed' : ''} ${isCompact ? 'compact' : ''}`;
+                            textDiv.style.left = `${slot.x}px`;
+                            
+                            let zhHtml = station.cn;
+                            if (isClosed) {
+                                zhHtml += `<span style="font-size:8px; color:#ef4444; font-weight:normal; display:block; line-height:1.1; margin-top:2px;">暂缓开通</span>`;
+                                enHtml += ` <span style="font-style:italic; color:#ef4444;">(Closed)</span>`;
+                            }
+
+                            textDiv.innerHTML = `
+                                <div class="zh">${zhHtml}</div>
+                                <div class="en">${enHtml}</div>
+                            `;
+                        }
+                        stationsLayer.appendChild(textDiv);
+
+                        if (station.transfers && station.transfers.length > 0) {
+                            const transDiv = document.createElement('div');
+                            transDiv.className = slot.isTop ? 'transfer-group' : 'transfer-group-up';
+                            transDiv.style.left = `${slot.x}px`;
+                            transDiv.style.top = slot.isTop ? `99px` : `213px`;
+                            
+                            let K = station.transfers.length;
+                            let arrowSvg = '';
+                            if (slot.isTop) {
+                                if (K === 1) {
+                                    arrowSvg = `<svg class="t-arrow-down" viewBox="0 0 24 48"><polygon points="4,0 20,0 20,34 24,34 12,48 0,34 4,34" fill="${station.transfers[0].color}"/></svg>`;
+                                } else {
+                                    arrowSvg = `
+                                        <svg class="t-arrow-down" viewBox="0 0 24 48">
+                                            <polygon points="4,0 12,0 12,48 0,34 4,34" fill="${station.transfers[0].color}"/>
+                                            <polygon points="12,0 20,0 20,34 24,34 12,48" fill="${station.transfers[1].color}"/>
+                                        </svg>
+                                    `;
+                                }
+                            } else {
+                                if (K === 1) {
+                                    arrowSvg = `<svg class="t-arrow-up" viewBox="0 0 24 48"><polygon points="12,0 24,14 20,14 20,48 4,48 4,14 0,14" fill="${station.transfers[0].color}"/></svg>`;
+                                } else {
+                                    arrowSvg = `
+                                        <svg class="t-arrow-up" viewBox="0 0 24 48">
+                                            <polygon points="12,0 24,14 20,14 20,48 12,48" fill="${station.transfers[1].color}"/>
+                                            <polygon points="12,0 12,48 4,48 4,14 0,14" fill="${station.transfers[0].color}"/>
+                                        </svg>
+                                    `;
+                                }
+                            }
+                            
+                            let boxesHtml = '<div class="t-box-container">';
+                            station.transfers.forEach((trans, tIdx) => {
+                                let isFirst = tIdx === 0;
+                                let isLast = tIdx === K - 1;
+                                let radiusStyle = '';
+                                if (K > 1) {
+                                    if (isFirst) radiusStyle = 'border-radius: 4px 0 0 4px;';
+                                    else if (isLast) radiusStyle = 'border-radius: 0 4px 4px 0;';
+                                    else radiusStyle = 'border-radius: 0;';
+                                }
+                                
+                                const style = trans.style || 'standard';
+                                if (style === 'standard') {
+                                    boxesHtml += `
+                                        <div class="t-box" style="background: ${trans.color}; ${radiusStyle}">
+                                            <div class="t-num">${trans.line}</div>
+                                            <div class="t-txt"><div>号线</div><div>Line ${trans.line}</div></div>
+                                        </div>
+                                    `;
+                                } else {
+                                    let planeIcon = (trans.cn.includes('机场') || trans.en.toLowerCase().includes('airport')) ? `
+                                        <svg style="width: 22px; height: 22px; fill: white; margin-right: 3px;" viewBox="0 0 24 24">
+                                            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+                                        </svg>
+                                    ` : '';
+                                    boxesHtml += `
+                                        <div class="t-box" style="background: ${trans.color}; ${radiusStyle} padding-left: 3px;">
+                                            ${planeIcon}
+                                            <div class="t-txt"><div>${trans.cn}</div><div>${trans.en}</div></div>
+                                        </div>
+                                    `;
+                                }
+                            });
+                            boxesHtml += '</div>';
+                            
+                            if (slot.isTop) {
+                                transDiv.innerHTML = arrowSvg + boxesHtml;
+                            } else {
+                                transDiv.innerHTML = boxesHtml + arrowSvg;
+                            }
+                            stationsLayer.appendChild(transDiv);
+                        }
+                    });
+                }
+                return; // Prevent standard linear map rendering
+            }
+
             // 1. Header elements
             const logoArea = document.getElementById('preview-logo-area');
             if (logoArea) {
@@ -2422,6 +3193,12 @@
             const listContainer = document.getElementById('editor-stations-list');
             listContainer.innerHTML = '';
             
+            const isLoop = globalConfig.layoutMode === 'loop';
+            const addBtn = document.querySelector('.station-editor-header .btn-success');
+            if (addBtn) {
+                addBtn.style.display = 'block';
+            }
+            
             stationsData.forEach((station, index) => {
                 const row = document.createElement('div');
                 row.className = 'station-edit-row';
@@ -2441,9 +3218,12 @@
                 }
                 
                 row.innerHTML = `
-                    <div class="row-handle">
-                        <button class="btn-icon" onclick="moveStation(${index}, -1)" ${index === 0 ? 'disabled' : ''} title="向上移动">▲</button>
-                        <button class="btn-icon" onclick="moveStation(${index}, 1)" ${index === stationsData.length - 1 ? 'disabled' : ''} title="向下移动">▼</button>
+                    <div class="row-handle" style="display: flex; align-items: center; gap: 6px;">
+                        <span class="drag-indicator" style="cursor: grab; color: var(--text-muted); font-size: 0.95rem; user-select: none; padding: 4px 2px;" title="拖拽排序">☰</span>
+                        <div style="display: flex; flex-direction: column; gap: 2px;">
+                            <button class="btn-icon" onclick="moveStation(${index}, -1)" ${index === 0 ? 'disabled' : ''} title="向上移动">▲</button>
+                            <button class="btn-icon" onclick="moveStation(${index}, 1)" ${index === stationsData.length - 1 ? 'disabled' : ''} title="向下移动">▼</button>
+                        </div>
                     </div>
                     <div class="row-inputs">
                         <input type="text" class="input-cn" value="${station.cn}" placeholder="站名" oninput="updateStationField(${index}, 'cn', this.value)">
@@ -2467,6 +3247,60 @@
                         <button class="btn-delete" onclick="deleteStation(${index})" title="删除此站">&times;</button>
                     </div>
                 `;
+
+                // Drag and Drop Event Listeners
+                const dragIndicator = row.querySelector('.drag-indicator');
+                if (dragIndicator) {
+                    dragIndicator.addEventListener('mouseenter', () => {
+                        row.setAttribute('draggable', 'true');
+                    });
+                    dragIndicator.addEventListener('mouseleave', () => {
+                        if (draggedIndex === null) {
+                            row.setAttribute('draggable', 'false');
+                        }
+                    });
+                }
+
+                row.addEventListener('dragstart', (e) => {
+                    draggedIndex = index;
+                    row.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', index);
+                });
+
+                row.addEventListener('dragend', () => {
+                    row.classList.remove('dragging');
+                    document.querySelectorAll('.station-edit-row').forEach(r => {
+                        r.classList.remove('drag-over');
+                        r.setAttribute('draggable', 'false');
+                    });
+                    draggedIndex = null;
+                });
+
+                row.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    if (draggedIndex !== null && draggedIndex !== index) {
+                        row.classList.add('drag-over');
+                    }
+                });
+
+                row.addEventListener('dragleave', () => {
+                    row.classList.remove('drag-over');
+                });
+
+                row.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    row.classList.remove('drag-over');
+                    if (draggedIndex !== null && draggedIndex !== index) {
+                        const movedItem = stationsData[draggedIndex];
+                        stationsData.splice(draggedIndex, 1);
+                        stationsData.splice(index, 0, movedItem);
+                        updateDynamicHeaders();
+                        renderAll();
+                    }
+                });
+
                 listContainer.appendChild(row);
             });
             
@@ -2477,6 +3311,8 @@
         function renderAll() {
             renderPreview();
             renderStationEditor();
+            const slider = document.getElementById('zoom-slider');
+            if (slider) updateZoom(slider.value);
         }
 
         // 6. Export Features
@@ -2484,7 +3320,7 @@
             const panel = document.getElementById('lcd-panel');
             const sliderVal = document.getElementById('zoom-slider').value;
             
-            // Set scaling to 1 temporarily to ensure the exported PNG is crisp and at native resolution (1550x460)
+            // Set scaling to 1 temporarily to ensure the exported PNG is crisp and at native resolution
             const scaleContainer = document.getElementById('preview-scale-container');
             scaleContainer.style.transform = 'none';
             scaleContainer.style.width = 'auto';
@@ -2495,6 +3331,25 @@
             const originalText = btn.innerHTML;
             btn.innerHTML = '正在渲染生成...';
             btn.disabled = true;
+
+            // Calculate export dimensions
+            const isLoop = globalConfig.layoutMode === 'loop';
+            const exportWidth = globalConfig.panelWidth || (isLoop ? 1800 : 1550);
+            const exportHeight = isLoop ? 400 : 460;
+
+            // Force the panel element to the exact export width/height before capture
+            panel.style.width = exportWidth + 'px';
+            panel.style.height = exportHeight + 'px';
+            scaleContainer.style.width = exportWidth + 'px';
+            scaleContainer.style.height = exportHeight + 'px';
+
+            // Also update right-pane width for loop mode
+            if (isLoop) {
+                const rightPane = panel.querySelector('.right-pane');
+                if (rightPane) {
+                    rightPane.style.width = (exportWidth - 350) + 'px';
+                }
+            }
 
             setTimeout(() => {
                 // Recalculate SVG points at scale 1.0 to ensure absolute precision in export
@@ -2509,8 +3364,8 @@
                 }
 
                 html2canvas(panel, {
-                    width: 1550,
-                    height: 460,
+                    width: exportWidth,
+                    height: exportHeight,
                     scale: 3.5, // Ultra-high resolution 3.5x
                     useCORS: true,          
                     backgroundColor: null, // Keeps background alpha transparent if rounded bezel
@@ -2571,17 +3426,18 @@
                     lineThemeColor = jsonObj.theme[2];
                 }
 
+                const isRmgLoop = jsonObj.loop === true;
                 const newConfig = {
                     metroNameCn: "北京地铁",
                     metroNameEn: "BEIJING SUBWAY",
                     logoChar: "D",
-                    logoBgColor: "#005A9E",
+                    logoBgColor: lineThemeColor,
                     logoTextColor: "#ffffff",
                     showLogo: true,
                     uploadedLogoUrl: "",
                     lineThemeColor: lineThemeColor,
                     passedTrackColor: "#cccccc",
-                    activeTrackColor: "#4CAF50",
+                    activeTrackColor: isRmgLoop ? lineThemeColor : "#4CAF50",
                     timeText: globalConfig.timeText || "2026-05-30  14:39",
                     useLiveTime: globalConfig.useLiveTime || false,
                     terminalCn: "",
@@ -2590,7 +3446,8 @@
                     autoNextStation: true,
                     nextStationCn: "",
                     nextStationEn: "",
-                    reverseDirection: false
+                    reverseDirection: false,
+                    layoutMode: isRmgLoop ? "loop" : "linear"
                 };
 
                 const stns = jsonObj.stn_list;
@@ -2789,9 +3646,19 @@
                     throw new Error("No stations parsed");
                 }
 
+                let finalStations = stations;
+                if (jsonObj.loop === true) {
+                    const xizhimenIdx = finalStations.findIndex(st => st.cn === "西直门" || st.en.includes("Xizhimen"));
+                    if (xizhimenIdx !== -1) {
+                        const part1 = finalStations.slice(xizhimenIdx);
+                        const part2 = finalStations.slice(0, xizhimenIdx);
+                        finalStations = part1.concat(part2);
+                    }
+                }
+
                 return {
                     config: newConfig,
-                    stations: stations
+                    stations: finalStations
                 };
             } catch (err) {
                 console.error("RMG parsing error:", err);
@@ -2852,6 +3719,7 @@
                         if (parsed.config && parsed.stations) {
                             globalConfig = parsed.config;
                             stationsData = parsed.stations;
+                            if (!globalConfig.layoutMode) globalConfig.layoutMode = 'linear';
                             
                             toggleLiveTime(globalConfig.useLiveTime);
                             updateDynamicHeaders();
